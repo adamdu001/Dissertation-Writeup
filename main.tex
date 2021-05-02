@@ -88,6 +88,9 @@ Email: a.du.3@warwick.ac.uk \\
 
 % -------------------------------------------------
 
+\section{Introduction}
+
+
 \section{Shuffling Theory}
 \subsection{Top in at Random Shuffle}
 
@@ -380,6 +383,10 @@ A famous example for the local representativeness effect is the gambler's fallac
 
 
 \newpage
+
+
+
+
 \section{Randomness in Playlists}
 In the previous section, we have seen how the distribution of a deck of cards can be modelled, and how to construct the top in at random shuffle and riffle shuffle; moreover, we are clear now why randomness is described by the uniform distribution. Apart from this, in the view of various psychology papers, we notice that some perceived "patterned" event turned out to be clumping of random events. This is called the misperception of randomness.
 
@@ -508,6 +515,12 @@ The aim of these box plots is to see whether the distribution of the first sever
 Overall, though non-randomness might exist in individual playlists, it cannot be captured in a comparison between the collective distributions of 1000 first songs, 1000 second songs, ..., etc, unless some strict, unrealistic assumptions are made. 
 
 \newpage
+
+
+
+
+
+
 
 \section{Runs Test}
 Although we have not been able to find any evidence of non-randomness in the last section by comparing their distributions of first several songs, this leads to a more reliable direction of work: since we cannot capture the non-randomness in the collective distribution of the songs in playlists, we can instead examine them individually by looking at one playlist at a time. This lead us to the runs test\cite{3.5}.
@@ -757,7 +770,64 @@ Though the K-category extension of the runs test is used here, a more powerful v
 
 
 \newpage
+
+
+
+
+
+
+
 \section{Multiple Testing Problem}
+In the last section, we have seen how to apply the runs test and its extension to our data; however, we should not forget that the dataset used has 997 playlists, and we essentially tested 997 hypotheses for each of the randomness of an audio feature. This gave rise to the multiple testing problem, where the $p$-values no longer accurately indicates the statistical significance\cite{5.2}. In this section, I will discuss theoretical background of multiple testing problem, some of possible correction methods and apply them to our dataset to see if there will be any changes.
+
+
+\subsection{Theoretical Background}
+A hypothesis test involves a null hypothesis $H_0$ and an alternative hypothesis $H_1$, and in a hypotheses test a person could make either a Type I error or a Type II error. These are defined as following\cite{5.2}:
+\begin{itemize}
+    \item \textbf{Type I Error:} rejecting a true $H_0$.
+    \item \textbf{Type II Error:} acceptance a false $H_0$.
+\end{itemize}
+So a Type I error is when an observation is not significant, you categorise it as significant observation. A Type II error is you categorise a significant observation as an insignificant one. It is generally agreed that making a Type I error has more serious consequences.\cite{5.2} The probability of making a Type I error (significance level) is usually set to be 0.05, which means you want to be 95\% confident that your results are significant, and there is a 5\% chance that it is only by chance.\cite{5.4}
+
+The family-wise error rate (FWER) provides an overall measure of error.\cite{5.1} Consider what we are doing in the last chapter: for one audio feature, we test 997 hypotheses with a significance level $\alpha=0.05$; then, we can compute the overall measure of error FWER\cite{5.4} as follows:
+\begin{align*}
+    P(\text{there exists at least 1 significant result})&=1-P(\text{no significant results exists})\\
+    &=1-(1-0.05)^{997}\\
+    &\approx 1
+\end{align*}
+This means we will almost surely observe at least a significant result with 997 hypotheses being tested, even if none of the 997 test are in fact significant. This probability of having significant results by chance rises with the number of hypotheses because the individual $\alpha$'s accumulate, i.e. 5\% for 1 test, 10\% for 2 tests, 15\% for 3 tests, etc.
+
+
+
+\begin{remark}
+Note the computation is based on the assumption that all 997 tests are independent. It is a fairly reasonable assumption because all 997 playlists were randomly sampled from 1,000,000 playlists which were created by different users for different purpose. Given such a large base to sample from, it is very unlikely that a significant portion of playlists are dependent.
+\end{remark}
+
+\newpage
+\subsection{Corrections Methods: Controlling FWER}
+\subsubsection{The Bonferroni Method}
+\subsubsection{The False Discovery Rate}
+
+\subsection{Corrections Methods: Controlling FDR}
+
+\subsection{Application}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -767,9 +837,40 @@ I have designed a function for k-category extension of runs test.
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\newpage
+\printbibliography[heading=bibintoc,title={References}]
 \newpage
 \begin{appendices}
-
 \section{Code for Data Extraction}
 \begin{verbatim}
 import json
@@ -859,8 +960,229 @@ def json_extract(obj, key):
 # #Extracting all playlist lengths and converting to an array
 # lengths = json_extract(playlists, 'num_tracks')
 \end{verbatim}
+\section{Code for EDA and Runs Tests}
+\begin{verbatim}
+library(randtests)
+library(readr)
+library(ggplot2)
+library(gridExtra)
+library(RColorBrewer)
+library(dplyr)
+library(reshape2)
+library(DescTools)
+setwd("~/Desktop/ST415/R/PlaylistData")
+song <- read_csv("new_final_data.csv")
+attach(song)
+#lets see density plot for numerical variables.
+p1<-ggplot(song, aes(x=danceability))
+   +geom_density(color="darkblue", fill="lightblue")
+p2<-ggplot(song, aes(x=energy))
+   +geom_density(color="darkblue", fill="lightblue")
+p3<-ggplot(song, aes(x=loudness))
+   +geom_density(color="darkblue", fill="lightblue")
+p4<-ggplot(song, aes(x=speechiness))
+   +geom_density(color="darkblue", fill="lightblue")
+p5<-ggplot(song, aes(x=acousticness))
+   +geom_density(color="darkblue", fill="lightblue")
+p6<-ggplot(song, aes(x=instrumentalness))
+   +geom_density(color="darkblue", fill="lightblue")
+p7<-ggplot(song, aes(x=liveness))
+   +geom_density(color="darkblue", fill="lightblue")
+p8<-ggplot(song, aes(x=valence))
+   +geom_density(color="darkblue", fill="lightblue")
+p9<-ggplot(song, aes(x=tempo))
+   +geom_density(color="darkblue", fill="lightblue")
+grid.arrange(p1,p2,p3,p4,p5,p6,p7,p8,p9,ncol=3)
 
+#Then I would like to gather the rows of first songs together
+#Extract rows of first, second, third songs from data.
+ind1 <- which(song$playlist_name != lag(song$playlist_name))
+ind1 <- c(1,ind1)
+ind2 <- sort(unique(c(ind1, ind1 + 1)))
+ind3 <- sort(unique(c(ind1, ind1 + 1,ind1 + 2)))
+#Form separate dfs for each
+song1st1<-slice(song,ind1)
+song1st1Remain<-slice(song,-ind1)
+song1st2<-slice(song,ind2)
+song1st2Remain<-slice(song,-ind2)
+song1st3<-slice(song,ind3)
+song1st3Remain<-slice(song,-ind3)
+#Then we want to see whether the first several songs are distributed
+#differently. Let's see first song. We start with labelling 
+#"song" and others.
+song1st1Remain$label <- rep("Remain",nrow(song1st1Remain))
+song1st2Remain$label <- rep("Remain",nrow(song1st2Remain))
+song1st3Remain$label <- rep("Remain",nrow(song1st3Remain))
+song1st1$label <- rep("First Song",nrow(song1st1))
+song1st2$label <- rep("First 2 Songs",nrow(song1st2))
+song1st3$label <- rep("First 3 Songs",nrow(song1st3))
+labelledcomb1<-rbind(song1st1,song1st1Remain)
+labelledcomb2<-rbind(song1st2,song1st2Remain)
+labelledcomb3<-rbind(song1st3,song1st3Remain)
+#Melt variables in order to prepare for bar plots
+labelledcomb1.m<-melt(labelledcomb1[,-c(1,5)],id.var = "label")
+labelledcomb2.m<-melt(labelledcomb2[,-c(1,5)],id.var = "label")
+labelledcomb3.m<-melt(labelledcomb3[,-c(1,5)],id.var = "label")
+#Plot boxplots
+pp1 <- ggplot(data = labelledcomb1.m, aes(x=variable, y=value))
+       +geom_boxplot(aes(fill=label))
+pp1 + facet_wrap( ~ variable, scales="free")
+pp2 <- ggplot(data = labelledcomb2.m, aes(x=variable, y=value))
+       +geom_boxplot(aes(fill=label))
+pp2 + facet_wrap( ~ variable, scales="free")
+pp3 <- ggplot(data = labelledcomb3.m, aes(x=variable, y=value))
+       +geom_boxplot(aes(fill=label))
+pp3 + facet_wrap( ~ variable, scales="free")
 
+#now I want to see what is the relations between positions in the playlists
+#i.e. how is bpm changes when you move from 1st to 2nd to 3rd....
+#so we extract their row number first
+ind2only <- ind1 + 1
+ind3only <- ind1 + 2
+ind4only <- ind1 + 3
+ind5only <- ind1 + 4
+ind6only <- ind1 + 5
+ind7only <- ind1 + 6
+song2nd <- slice(song,ind2only)
+song3rd <- slice(song,ind3only)
+song4th <- slice(song,ind4only)
+song5th <- slice(song,ind5only)
+song6th <- slice(song,ind6only)
+song7th <- slice(song,ind7only)
+song2nd$label <- rep("2nd Song",997)
+song3rd$label <- rep("3rd Song",997)
+song4th$label <- rep("4th Song",997)
+song5th$label <- rep("5th Song",997)
+song6th$label <- rep("6th Song",997)
+song7th$label <- rep("7th Song",997)
+#melt down to prepare the box plots
+first7.melt<-rbind(song1st1,song2nd,song3rd,
+   song4th,song5th,song6th,song7th)[,-c(1,5)] %>% melt(id.var="label")
+#sort the order of songs first
+first7.melt$label <- factor(first7.melt$label,levels = c("First Song"
+   ,"2nd Song","3rd Song","4th Song","5th Song","6th Song","7th Song"))
+#box plots for first 5 separately
+ppfirst7<-ggplot(data = first7.melt, aes(x=variable, y=value))
+   +geom_boxplot(aes(fill=label))
+ppfirst7 + facet_wrap( ~ variable, scales="free")
+l1dance<-song$danceability[1:62]
+l1dancert<-runs.test(l1dance,threshold = as.numeric(mean(l1dance)))
+l1dancert$p.value
+#here we got row locations of each starting of a playlist
+#Thus we can locate the locations for each playlists:
+ind1[1]:(ind1[2]-1)
+ind1[2]:(ind1[3]-1)
+#Note for the last playlists, we need to refine our ind1
+IND<-c(ind1,nrow(song)+1)
+#thus we have
+IND[1]:(IND[2]-1) #first playlist row location
+IND[997]:(IND[998]-1)  #final playlist row location
+#I wanna perform runs test on each of the playlists
+RT<-function(a){ #a is a vector like danceability
+  p<-rep(0,997)
+  for (i in 1:997) {
+    #perform runs test for each playlist and report p values
+    p[i]<-runs.test(a[IND[i]:(IND[i+1]-1)],
+    threshold = median(a[IND[i]:(IND[i+1]-1)]))$p.value
+  }
+  return(p)
+}
+P.dance<-RT(song$danceability)
+nrow(as.data.frame(which(P.dance<0.05)))
+P.energy<-RT(song$energy)
+nrow(as.data.frame(which(P.energy<0.05)))
+P.loudness<-RT(song$loudness)
+nrow(as.data.frame(which(P.loudness<0.05)))
+P.speechiness<-RT(song$speechiness)
+nrow(as.data.frame(which(P.speechiness<0.05)))
+P.acousticness<-RT(song$acousticness)
+nrow(as.data.frame(which(P.acousticness<0.05)))
+P.liveness<-RT(song$liveness)
+nrow(as.data.frame(which(P.liveness<0.05)))
+P.valence<-RT(song$valence)
+nrow(as.data.frame(which(P.valence<0.05)))
+#only tempo is left to examine and here we use 3 categories
+#,with cutting point 99,126, so we write a function for this
+RTkext<-function(x, alternative = "two.sided"){
+  dname <- deparse(substitute(x))
+  if (alternative == "t") {
+    alternative <- "two.sided"
+  }
+  if (alternative == "l") {
+    alternative <- "left.sided"
+  }
+  if (alternative == "r") {
+    alternative <- "right.sided"
+  }
+  if (alternative != "two.sided" & alternative != "left.sided" & 
+      alternative != "right.sided") {
+    stop("must give a valid alternative")
+  }
+  x <- na.omit(x)
+  stopifnot(is.numeric(x))
+  s1<-x[which(x<=99)]
+  s2<-x[which(x>99&&x<=126)]
+  s3<-x[which(x>126)]
+  n1 <- length(s1)
+  n2 <- length(s2)
+  n3 <- length(s3)
+  n <- n1 + n2 + n3
+  s<-x#create a vector of binned values as following
+  s[which(s<=99)]<-1
+  s[which(s>99&&s<=126)]<-2
+  s[which(s>126)]<-3
+  runs <- rle(s)
+  #count no.of runs in each bin
+  r1 <- length(runs$lengths[runs$values == 1])
+  r2 <- length(runs$lengths[runs$values == 2])
+  r3 <- length(runs$lengths[runs$values == 3])
+  #compute elements for test statistic
+  #see reference in Sheskin pg.242
+  sumsq<-n1^2+n2^2+n3^2
+  sumcb<-n1^3+n2^3+n3^3
+  mu <- (n*(n+1)-sumsq)/n
+  vr <- (sumsq*(sumsq+n*(n+1))-2*n*sumcb-n^3)/(n^2 * (n - 1))
+  rr <- r1 + r2 + r3
+  pv0 <- pnorm((rr - mu)/sqrt(vr))
+  if (alternative == "two.sided") {
+    pv <- 2 * min(pv0, 1 - pv0)
+  }
+  if (alternative == "left.sided") {
+    pv <- pv0
+  }
+  if (alternative == "right.sided") {
+    pv <- 1 - pv0
+  }
+  if (alternative == "two.sided") {
+    alternative <- "nonrandomness"
+  }
+  if (alternative == "left.sided") {
+    alternative <- "trend"
+  }
+  if (alternative == "right.sided") {
+    alternative <- "first-order negative autocorrelation"
+  }
+  rval <- list(statistic = c(statistic = (rr - mu)/sqrt(vr)), 
+        p.value = pv, runs = rr, mu = mu, var = vr, 
+        method = "Runs Test k-ext", 
+        data.name = dname, 
+        parameter = c(runs = rr, n1 = n1, n2 = n2, n3 = n3, n = n), 
+        alternative = alternative)
+  class(rval) <- "htest"
+  return(rval)
+}
+#then put the k ext function into a recursive function
+RT.KEXT<-function(a){ #a is a vector like danceability
+  p<-rep(0,997)
+  for (i in 1:997) {
+    #perform runs test with k ext for each playlist and report p values
+    p[i]<-RTkext(a[IND[i]:(IND[i+1]-1)])$p.value
+  }
+  return(p)#report p value
+}
+#apply it on the tempo
+P.tempo<-RT.KEXT(song$tempo)
+nrow(as.data.frame(which(P.tempo<0.05)))
+\end{verbatim}
 \end{appendices}
-
 \end{document}
