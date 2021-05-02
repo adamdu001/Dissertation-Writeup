@@ -778,24 +778,24 @@ Though the K-category extension of the runs test is used here, a more powerful v
 
 
 \section{Multiple Testing Problem}
-In the last section, we have seen how to apply the runs test and its extension to our data; however, we should not forget that the dataset used has 997 playlists, and we essentially tested 997 hypotheses for each of the randomness of an audio feature. This gave rise to the multiple testing problem, where the $p$-values no longer accurately indicates the statistical significance\cite{5.2}. In this section, I will discuss theoretical background of multiple testing problem, some of possible correction methods and apply them to our dataset to see if there will be any changes.
+In the last section, we have seen how to apply the runs test and its extension to our data; however, we should not forget that the dataset used has 997 playlists, and we essentially tested 997 hypotheses for each of the randomness of an audio feature. This gave rise to the multiple testing problem, where the $p$-values no longer accurately indicates the statistical significance\cite{5.2}. In this section, I will discuss the theoretical background of multiple testing problem and some of possible correction methods; then, I will apply them to our dataset to see if there will be any changes.
 
 
 \subsection{Theoretical Background}
 A hypothesis test involves a null hypothesis $H_0$ and an alternative hypothesis $H_1$, and in a hypotheses test a person could make either a Type I error or a Type II error. These are defined as following\cite{5.2}:
 \begin{itemize}
-    \item \textbf{Type I Error:} rejecting a true $H_0$.
-    \item \textbf{Type II Error:} acceptance a false $H_0$.
+    \item \textbf{Type I Error:} number of rejections of true $H_0$.
+    \item \textbf{Type II Error:} number of acceptances of false $H_0$.
 \end{itemize}
 So a Type I error is when an observation is not significant, you categorise it as significant observation. A Type II error is you categorise a significant observation as an insignificant one. It is generally agreed that making a Type I error has more serious consequences.\cite{5.2} The probability of making a Type I error (significance level) is usually set to be 0.05, which means you want to be 95\% confident that your results are significant, and there is a 5\% chance that it is only by chance.\cite{5.4}
 
-The family-wise error rate (FWER) provides an overall measure of error.\cite{5.1} Consider what we are doing in the last chapter: for one audio feature, we test 997 hypotheses with a significance level $\alpha=0.05$; then, we can compute the overall measure of error FWER\cite{5.4} as follows:
+The family-wise error rate (FWER) provides an overall measure of error.\cite{5.1} Consider what we are doing in the last chapter: for one audio feature, we tested 997 hypotheses with a significance level $\alpha=0.05$; then, we can compute the overall measure of error FWER\cite{5.4} as follows:
 \begin{align*}
     P(\text{there exists at least 1 significant result})&=1-P(\text{no significant results exists})\\
     &=1-(1-0.05)^{997}\\
     &\approx 1
 \end{align*}
-This means we will almost surely observe at least a significant result with 997 hypotheses being tested, even if none of the 997 test are in fact significant. This probability of having significant results by chance rises with the number of hypotheses because the individual $\alpha$'s accumulate, i.e. 5\% for 1 test, 10\% for 2 tests, 15\% for 3 tests, etc.
+This means we will almost surely observe at least 1 significant result with 997 hypotheses being tested, even if none of the 997 test are in fact significant. The probability of having significant results by chance rises with the number of hypotheses because the individual $\alpha$'s accumulate, i.e. 5\% for 1 test, 10\% for 2 tests, 15\% for 3 tests, etc.\cite{5.4}
 
 
 
@@ -804,14 +804,69 @@ Note the computation is based on the assumption that all 997 tests are independe
 \end{remark}
 
 \newpage
-\subsection{Corrections Methods: Controlling FWER}
-\subsubsection{The Bonferroni Method}
+\subsection{Correction Methods}
+There are two ways to control Type I Error, one is to control the FWER and another to control the false discovery rate. In the following of this subsection I will go through a range of methods from these two aspects.
+
+\subsubsection{Bonferroni Correction}
+The Bonferroni correction was designed to control the FWER, which is to control the overall probability of at least 1 Type I Error. It is to divide the significance level $\alpha$ by $m$, the total number of test, which is 997 in our case. By doing such division, FWER will be bounded above by $\alpha$, i.e. 
+\[P(\text{at least 1 Type I Error})\leq \alpha.\]
+
+\begin{proof}\cite{5.3}
+Let the significance level be $\frac{\alpha}{m}$. Suppose each independent hypotheses test generates a $p$-value $p_i$, and $I=\{i:1\leq i\leq m\}$. Then,
+\begin{align*}
+    P(\text{at least 1 Type I Error})&=P(p_i<\frac{\alpha}{m}\; \text{for some} \;i)\\
+    &\leq\sum_{\text{some}\; i\in I} P(p_i<\frac{\alpha}{m})\\
+    &=\sum_{\text{some}\; i\in I}\frac{\alpha}{m}\\
+    &\leq\frac{\alpha|I|}{m}\\
+    &=\alpha
+\end{align*}
+The second line is simply an application of the Boole's inequality. The third line follows from the fact that $p_i\sim Uniform[0,1]$ for all $i\in I$. In the fourth line, $|I|$ denotes the class size of $I$, which is exactly $m$. 
+\end{proof}
+
+The Bonferroni correction is generally deemed to be very conservative, especially when $m$ becomes large.\cite{5.4}\cite{5.1}\cite{5.3}\cite{5.5}. This is because, if we take $m=1000$ for instance, we will end up with a significance level of $\frac{0.05}{1000}=0.00005$, which is extremely small. Only few results will be significant under this setting, but the true number of significant results lies way beyond that, i.e. a high rate of false acceptance/negative.
+
+\newpage
 \subsubsection{The False Discovery Rate}
+From the last subsection, we found that controlling FWER controls the probability of making Type I Error at all. In this subsection, we will study the control on the false discovery rate, which is to control the proportion of false positives/discovery in relation to true positives. 
 
-\subsection{Corrections Methods: Controlling FDR}
+The false discovery rate (FDR) is defined to be $E[\frac{V}{R}]$, the expected value of false positives among all positive results. $V$ and $R$ are given in Table \ref{table 3}. Note that we work on this expectation because we can only observe $R$ with no information on $V$ and $S$.\cite{5.3} Next let me introduce the Benjamini-Hochberg procedure.
 
+\begin{table}[h]
+    \centering
+    \begin{tabular}{|c|c|c|c|}
+    \hline
+    & Called Not Significant & Called Significant & Total \\
+    \hline
+    $H_0$  True & $U$ & $V$ & $m_0$\\
+    \hline
+    $H_0$  False & $T$ & $S$ & $m_1$\\
+    \hline
+    Total & $m-R$ & $R$ & $m$\\
+    \hline
+    \end{tabular}
+    \caption{\textbf{Multiple Testing Summary.} $U$ is the number of true negatives. $S$ is the number of true positives. $T$ is the number of false negatives. $V$ is the number of false positives, also the number of Type I Error.}
+    \label{table 3}
+\end{table}
+
+\underline{\textbf{The Benjamini-Hochberg procedure}}\cite{5.3}
+\begin{itemize}
+    \item Sort $m$ $p$-values from $m$ independent hypotheses in increasing order, i.e. \[p_1<p_2<\cdots<p_m.\]
+    \item $k=\max\{i: p_i<\alpha\cdot \frac{i}{m}\}$
+    \item Reject all hypotheses corresponding to $p_1,\cdots,p_k$, i.e. $H^1,\cdots,H^k$.
+\end{itemize}
+
+\begin{theorem}
+The Benjamini-Hochberg procedure controls the FDR at $\alpha$
+for independent hypothesis tests.
+\end{theorem}
+
+
+
+
+
+\newpage
 \subsection{Application}
-
+After seeing these methods of controlling the Type I Error, let us see in practice what effect will these methods have on our data.
 
 
 
