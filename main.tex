@@ -823,7 +823,7 @@ Let the significance level be $\frac{\alpha}{m}$. Suppose each independent hypot
 The second line is simply an application of the Boole's inequality. The third line follows from the fact that $p_i\sim Uniform[0,1]$ for all $i\in I$. In the fourth line, $|I|$ denotes the class size of $I$, which is exactly $m$. 
 \end{proof}
 
-The Bonferroni correction is generally deemed to be very conservative, especially when $m$ becomes large.\cite{5.4}\cite{5.1}\cite{5.3}\cite{5.5}. This is because, if we take $m=1000$ for instance, we will end up with a significance level of $\frac{0.05}{1000}=0.00005$, which is extremely small. Only few results will be significant under this setting, but the true number of significant results lies way beyond that, i.e. a high rate of false acceptance/negative.
+The Bonferroni correction is generally deemed to be very conservative, especially when $m$ becomes large.\cite{5.4}\cite{5.1}\cite{5.3}\cite{5.5}. This is because, if we take $m=1000$ for instance, we will end up with a significance level of $\frac{0.05}{1000}=0.00005$, which is extremely small. Only few results will be significant under this setting, but the true number of significant results lies way beyond that, i.e. a high rate of false negative. As commented in \cite{5.5}, the false positives gets reduced at the expense of false negatives. Different context with different consequences of false positives/negatives will result in different choices of the trade-off. Though in the context of randomness in the playlists it does not matter which of the Type I or Type II Error is worse, in the context of border control during COVID-19 a false negative does have more serious consequences.
 
 \newpage
 \subsubsection{The False Discovery Rate}
