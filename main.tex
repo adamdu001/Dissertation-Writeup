@@ -782,10 +782,10 @@ In the last section, we have seen how to apply the runs test and its extension t
 
 
 \subsection{Theoretical Background}
-A hypothesis test involves a null hypothesis $H_0$ and an alternative hypothesis $H_1$, and in a hypotheses test a person could make either a Type I error or a Type II error. These are defined as following\cite{5.2}:
+A hypothesis test involves a null hypothesis and an alternative hypothesis, and in a hypotheses test a person could make either a Type I error or a Type II error. These are defined as following\cite{5.2}:
 \begin{itemize}
-    \item \textbf{Type I Error:} number of rejections of true $H_0$.
-    \item \textbf{Type II Error:} number of acceptances of false $H_0$.
+    \item \textbf{Type I Error:} number of rejections of true null hypothesis.
+    \item \textbf{Type II Error:} number of acceptances of false null hypothesis.
 \end{itemize}
 So a Type I error is when an observation is not significant, you categorise it as significant observation. A Type II error is you categorise a significant observation as an insignificant one. It is generally agreed that making a Type I error has more serious consequences.\cite{5.2} The probability of making a Type I error (significance level) is usually set to be 0.05, which means you want to be 95\% confident that your results are significant, and there is a 5\% chance that it is only by chance.\cite{5.4}
 
@@ -823,13 +823,11 @@ Let the significance level be $\frac{\alpha}{m}$. Suppose each independent hypot
 The second line is simply an application of the Boole's inequality. The third line follows from the fact that $p_i\sim Uniform[0,1]$ for all $i\in I$. In the fourth line, $|I|$ denotes the class size of $I$, which is exactly $m$. 
 \end{proof}
 
-The Bonferroni correction is generally deemed to be very conservative, especially when $m$ becomes large.\cite{5.4}\cite{5.1}\cite{5.3}\cite{5.5}. This is because, if we take $m=1000$ for instance, we will end up with a significance level of $\frac{0.05}{1000}=0.00005$, which is extremely small. Only few results will be significant under this setting, but the true number of significant results lies way beyond that, i.e. a high rate of false negative. As commented in \cite{5.5}, the false positives gets reduced at the expense of false negatives. Different context with different consequences of false positives/negatives will result in different choices of the trade-off. Though in the context of randomness in the playlists it does not matter which of the Type I or Type II Error is worse, in the context of border control during COVID-19 a false negative does have more serious consequences.
+The Bonferroni correction is generally deemed to be very conservative \cite{5.4}\cite{5.1}\cite{5.3}\cite{5.5}\cite{5.6}, especially when $m$ becomes large. This is because, if we take $m=1000$ for instance, we will end up with a significance level of $\frac{0.05}{1000}=0.00005$, which is extremely small. Only few results will be significant under this setting, but the true number of significant results lies way beyond that, i.e. a high rate of false negative. As commented in \cite{5.5}, the false positives gets reduced at the expense of false negatives. Severity of false positives/negatives will depends on the context. Though in the context of randomness in the playlists it does not matter which of the Type I or Type II Error is worse, in the context of, say, border control during COVID-19 a false negative does have more serious consequences.
 
 \newpage
 \subsubsection{The False Discovery Rate}
 From the last subsection, we found that controlling FWER controls the probability of making Type I Error at all. In this subsection, we will study the control on the false discovery rate, which is to control the proportion of false positives/discovery in relation to true positives. 
-
-The false discovery rate (FDR) is defined to be $E[\frac{V}{R}]$, the expected value of false positives among all positive results. $V$ and $R$ are given in Table \ref{table 3}. Note that we work on this expectation because we can only observe $R$ with no information on $V$ and $S$.\cite{5.3} Next let me introduce the Benjamini-Hochberg procedure.
 
 \begin{table}[h]
     \centering
@@ -837,31 +835,57 @@ The false discovery rate (FDR) is defined to be $E[\frac{V}{R}]$, the expected v
     \hline
     & Called Not Significant & Called Significant & Total \\
     \hline
-    $H_0$  True & $U$ & $V$ & $m_0$\\
+    Null True & $U$ & $V$ & $m_0$\\
     \hline
-    $H_0$  False & $T$ & $S$ & $m_1$\\
+    Null False & $T$ & $S$ & $m_1$\\
     \hline
     Total & $m-R$ & $R$ & $m$\\
     \hline
     \end{tabular}
-    \caption{\textbf{Multiple Testing Summary.} $U$ is the number of true negatives. $S$ is the number of true positives. $T$ is the number of false negatives. $V$ is the number of false positives, also the number of Type I Error.}
+    \caption{\textbf{Multiple Testing Summary.} $U$ is the number of true negatives. $S$ is the number of true positives. $T$ is the number of false negatives. $V$ is the number of false positives, also the number of Type I Error. $U,V,T,S$ are not observable, and only $R$ is observable.\cite{5.3}\cite{5.7}}
     \label{table 3}
 \end{table}
 
-\underline{\textbf{The Benjamini-Hochberg procedure}}\cite{5.3}
+Table \ref{table 3} is a summary for number of errors made when performing $m$ hypothesis tests. When $m$ tests are performed, what we can directly observe is the number of rejections, i.e. $R$; however, do we know how many results within R rejections actually have a true Null (V) and how many actually have a false Null (S)? The answer is no, these quantities are not directly observable.\cite{5.3}\cite{5.7} Thus, let the proportion of the rejected results which are falsely rejected (false positive or false discovery) be $$Q=\frac{V}{V+S}=\frac{V}{R}.$$  Note that when the denominator $R=0$, i.e. there is no rejections in $m$ tests, we define $Q=0$. The lower-case letters of the random variables in Table \ref{table 3} represents their realisations and will be used in the following. Based on these constructions, we can now define the false discovery rate.
+
+\begin{remark}
+By constructions in Table \ref{table 3}, FWER$=P(V\ge1)$.
+\end{remark}
+
+\begin{definition}
+The false discovery rate (FDR) $Q_e$ is defined as follows \cite{5.7}:\[
+Q_e=E[Q]=E\left[\frac{V}{V+S}\right]=E\left[\frac{V}{R}\right]
+\]
+\end{definition}
+
+Next let me define the Benjamini-Hochberg procedure. To avoid confusion, from now on we use $H_1$ to represent the $1$st null hypothesis instead of the alternative hypothesis for a test.
+\begin{definition}
+The Benjamini-Hochberg procedure is defined as follows \cite{5.7}:
 \begin{itemize}
-    \item Sort $m$ $p$-values from $m$ independent hypotheses in increasing order, i.e. \[p_1<p_2<\cdots<p_m.\]
-    \item $k=\max\{i: p_i<\alpha\cdot \frac{i}{m}\}$
-    \item Reject all hypotheses corresponding to $p_1,\cdots,p_k$, i.e. $H^1,\cdots,H^k$.
+    \item Consider testing $m$ independent null hypotheses $H_1,\cdots,H_m$ based on their respective $p$-values, $P_1,\cdots,P_m$.
+    \item Sort the $p$-values in increasing order, i.e. $P_{(1)}<P_{(2)}<\cdots<P_{(m)}$. $P_{(i)}$ corresponds to the null hypothesis $H_{(i)}$.
+    \item $k=\max\{i: P_{(i)}< q^*\cdot \frac{i}{m}\}$
+    \item Reject all $H_{(1)},\cdots,H_{(k)}$.
 \end{itemize}
+\end{definition}
+
+
+
+
 
 \begin{theorem}
-The Benjamini-Hochberg procedure controls the FDR at $\alpha$
-for independent hypothesis tests.
+The Benjamini-Hochberg procedure controls the FDR at $q^*$
+for independent hypothesis tests. \cite{5.7}
 \end{theorem}
 
 
 
+To prove Theorem 4, we need the following lemma.
+
+
+\begin{lemma}\cite{5.7}
+Suppose there are $m$ independent $p$-values from $m$ independent hypotheses tests. As defined in Table \ref{table 3}, $m_0$ and $m_1$ are the total number of tests with $H_0$ true and $H_0$ false respectively.
+\end{lemma}
 
 
 \newpage
