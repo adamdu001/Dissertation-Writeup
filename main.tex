@@ -13,6 +13,8 @@
 \usepackage{parskip} % paragraph separation
 \usepackage{amssymb} % math symbols
 \usepackage{amsmath}
+\setlength{\jot}{2ex} % set vertical space between equations
+\usepackage{bbm}
 \usepackage{amsfonts}
 \usepackage[english]{babel}
 \usepackage[sorting=none]{biblatex}
@@ -833,7 +835,7 @@ From the last subsection, we found that controlling FWER controls the probabilit
     \centering
     \begin{tabular}{|c|c|c|c|}
     \hline
-    & Called Not Significant & Called Significant & Total \\
+    & Called Not Significant/Acceptance & Called Significant/Rejection & Total \\
     \hline
     Null True & $U$ & $V$ & $m_0$\\
     \hline
@@ -846,7 +848,7 @@ From the last subsection, we found that controlling FWER controls the probabilit
     \label{table 3}
 \end{table}
 
-Table \ref{table 3} is a summary for number of errors made when performing $m$ hypothesis tests. When $m$ tests are performed, what we can directly observe is the number of rejections, i.e. $R$; however, do we know how many results within R rejections actually have a true Null (V) and how many actually have a false Null (S)? The answer is no, these quantities are not directly observable.\cite{5.3}\cite{5.7} Thus, let the proportion of the rejected results which are falsely rejected (false positive or false discovery) be $$Q=\frac{V}{V+S}=\frac{V}{R}.$$  Note that when the denominator $R=0$, i.e. there is no rejections in $m$ tests, we define $Q=0$. The lower-case letters of the random variables in Table \ref{table 3} represents their realisations and will be used in the following. Based on these constructions, we can now define the false discovery rate.
+Table \ref{table 3} is a summary for the number of errors made when performing $m$ hypothesis tests. When $m$ tests are performed, what we can directly observe is the number of rejections, i.e. $R$; however, do we know how many results within R rejections actually have a true Null (V) and how many actually have a false Null (S)? The answer is no, these quantities are not directly observable.\cite{5.3}\cite{5.7} Thus, let the proportion of the rejected results which are falsely rejected (false positive or false discovery) be $$Q=\frac{V}{V+S}=\frac{V}{R}.$$  Note that when the denominator $R=0$, i.e. there is no rejections in $m$ tests, we define $Q=0$. The lower-case letters of the random variables in Table \ref{table 3} represents their realisations and will be used in the following. By these constructions, we can define the false discovery rate.
 
 \begin{remark}
 By constructions in Table \ref{table 3}, FWER$=P(V\ge1)$.
@@ -858,7 +860,66 @@ Q_e=E[Q]=E\left[\frac{V}{V+S}\right]=E\left[\frac{V}{R}\right]
 \]
 \end{definition}
 
-Next let me define the Benjamini-Hochberg procedure. To avoid confusion, from now on we use $H_1$ to represent the $1$st null hypothesis instead of the alternative hypothesis for a test.
+This definition of FDR gives rise to two nice properties about the relationship between FDR and FWER. We show them in the following lemmas.
+
+\begin{lemma}
+If all null hypotheses are true, FDR is equivalent to FWER. \cite{5.7}
+\end{lemma}
+
+\begin{proof} \cite{5.3}
+First note we will use the realisation of the random variables in Table \ref{table 3}. When all null hypotheses are true, any rejection is a false rejection, i.e. $r=v$, $s=0$ and also $m=m_0$. Now, 
+\begin{equation*}
+  Q=
+    \begin{cases}
+    0&\text{if $v=0$}\\
+    1&\text{otherwise}
+    \end{cases}
+\end{equation*}
+
+Then,
+\begin{align*}
+    \text{FDR}&=E[Q]\\
+    &=\sum_{all\;q}P[q]\times q\\
+    &=P[q=0]\times0+P[q=1]\times1\\
+    &=P[q=1]\\
+    &=P[V\ge 1]\\
+    &=\text{FWER}
+\end{align*}
+\end{proof}
+
+\begin{remark}
+Lemma 6 shows how controlling FDR implies a control of FWER. As noted in Benjamini(1995) \cite{5.7}, this is a control in the weak sense, since it is based on the assumption that all null hypotheses are true.
+\end{remark}
+
+\begin{lemma}
+If only a fraction of the null hypotheses are true, FDR is bounded above by FWER. \cite{5.7}
+\end{lemma}
+
+\begin{proof} \cite{5.3}
+Suppose only a fraction of the null hypotheses are true. We have $m_0, m_1<m$, $Q=\frac{v}{v+s}\leq1$. Define the indicator function:
+\[\mathbbm{1}_{\{\text{there exists at least 1 false rejection}\}}=\mathbbm{1}_{\{V\ge1\}}\]
+Then we have
+\begin{equation*}
+    \begin{cases}
+    \mathbbm{1}_{\{V\ge1\}}=Q & \text{if $v=0$}\\
+    \mathbbm{1}_{\{V\ge1\}}\ge Q & \text{if $v\ge1$}
+    \end{cases}
+\end{equation*}
+This implies that\[\mathbbm{1}_{\{V\ge1\}}\ge Q\]
+Now if we take expectation on both sides,
+\begin{gather*}
+    E[\mathbbm{1}_{\{V\ge1\}}]\ge E[Q]\\
+    0\times P[v\ge1]+1\times P[v\ge1]\ge E[Q]\\
+    P[v\ge1]\ge E[Q]\\
+    \text{FWER}\ge \text{FDR}
+\end{gather*}
+\end{proof}
+
+\begin{remark}
+By lemma 7, any control on FWER will also control FDR since FDR is bounded above by FWER. However, when $S$ gets larger, i.e. more hypotheses are non-true, the proportion for the false rejection $Q$ gets lower. Thus, the FDR will be lower and there will be a greater difference between FDR and FWER. We say the stringency of this upper bound becomes lower and we expect a gain in power.\cite{5.3}\cite{5.7}
+\end{remark}
+
+Next let me define the Benjamini-Hochberg procedure, in which we control the FDR.
 \begin{definition}
 The Benjamini-Hochberg procedure is defined as follows \cite{5.7}:
 \begin{itemize}
@@ -879,8 +940,6 @@ for independent hypothesis tests. \cite{5.7}
 \end{theorem}
 
 
-
-To prove Theorem 4, we need the following lemma.
 
 
 \begin{lemma}\cite{5.7}
