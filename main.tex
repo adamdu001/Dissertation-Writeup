@@ -993,7 +993,7 @@ Next, we will condition the $E[Q|Z_1=z_1,\cdots,Z_{m_1}=z_{m_1}]$ on $X_{m_0}=p$
 E[Q|Z_1=z_1,\cdots,Z_{m_1}=z_{m_1}]=\int_0^1 E[Q,X_{m_0}=p|Z_1=z_1,\cdots,Z_{m_1}=z_{m_1}]dp\\
 =\int_0^1E[Q|X_{m_0}=p,Z_1=z_1,\cdots,Z_{m_1}=z_{m_1}]P[X_{m_0}=p|Z_1=z_1,\cdots,Z_{m_1}=z_{m_1}]dp\\
 =\int_0^1E[Q|X_{m_0}=p,Z_1=z_1,\cdots,Z_{m_1}=z_{m_1}]P[X_{m_0}=p]dp\\
-=\int_0^{z'}E[Q|X_{m_0}=p,Z_1=z_1,\cdots,Z_{m_1}=z_{m_1}]P[X_{m_0}]dp\;+\\\int_{z'}^1E[Q|X_{m_0}=p,Z_1=z_1,\cdots,Z_{m_1}=z_{m_1}]P[X_{m_0}]dp
+=\int_0^{z'}E[Q|X_{m_0}=p,Z_1=z_1,\cdots,Z_{m_1}=z_{m_1}]P[X_{m_0}=p]dp\;+\\\int_{z'}^1E[Q|X_{m_0}=p,Z_1=z_1,\cdots,Z_{m_1}=z_{m_1}]P[X_{m_0}=p]dp
 \end{gather}
 
 (8) is pretty straight forward. (9) is because we moved $X_{m_0}=p$ into the "condition side" in the expectation. (10) is because $X_{m_0}$ is independent of any $Z_j$, since $X_{m_0}$ is the largest $p$-value corresponding to true null hypotheses and $Z_j$'s are the $p$-values corresponding to false null hypotheses. All $p$-values are independent with each other. In (11) and (12), we split the integral using a cut-off point $z'$ as defined above. Then if we can prove the sum of (11) and (12) to be the RHS of lemma 8 the proof is complete.
@@ -1073,31 +1073,104 @@ Thus, (12) becomes
 &=\int_{z'}^1 \frac{m_0-1}{(k+1)p}q^*m_0p^{m_0-1}dp\\
 &=\int_{z'}^1 \frac{m_0-1}{(k+1)}q^*m_0p^{m_0-2}dp\\
 &=\frac{m_0}{k+1}q^*\int_{z'}^1(m_0-1)p^{m_0-2}dp\\
-&=
+&=\frac{m_0}{k+1}q^*(1-(z')^{m_0-1})
 \end{align*}
 
-
-
+Finally, adding (11) and (12) together,
+\begin{gather*}
+    E[Q|Z_1=z_1,\cdots,Z_{m_1}=z_{m_1}]=\int_0^{z'}E[Q|X_{m_0}=p,Z_1=z_1,\cdots,Z_{m_1}=z_{m_1}]P[X_{m_0}=p]dp\;+\\\int_{z'}^1E[Q|X_{m_0}=p,Z_1=z_1,\cdots,Z_{m_1}=z_{m_1}]P[X_{m_0}=p]dp\\ 
+    =\frac{m_0}{k+1}q^*(z')^{m_0-1}+\frac{m_0}{k+1}q^*(1-(z')^{m_0-1})\\
+    =\frac{m_0}{k+1}q^*
+\end{gather*}
+Now the statement in Lemma 8 is true for $m=k+1$. By induction, Lemma 8 is true for all positive integer.
 \end{proof}
-
-
 
 
 \textbf{Proof of Theorem 4}
 \begin{proof} \cite{5.3}\cite{5.7}
-From lemma 8, 
+From lemma 8, whatever the joint distribution of $Z_1,\cdots,Z_{m_1}$ is,  if we integrate the inequality, we get
+\[E[Q]\leq\frac{m_0}{m}q^*\leq q*
+\]
+Thus the FDR is bounded by $q^*$.
 \end{proof}
 
 \newpage
 \subsection{Application}
-In section 4 we performed the counting of number of rejections after producing vectors of $p$-values. Now what we really need is those vectors. For each music feature, it has 1 corresponding vectors of $p$-values representing 997 times of hypothesis test. In the following, I will perform the Bonferroni correction and the Benjamini-Hochberg procedure on each of the $p$-vectors, and then compare the rejection counts to the original case.
+In section 4 we performed the counting of number of rejections after producing vectors of $p$-values. For each music feature, it has 1 corresponding vectors of $p$-values representing 997 times of hypothesis test. Now what we really need are those vectors. In the following, I will perform the Bonferroni correction and the Benjamini-Hochberg procedure on each of the $p$-vectors, and then compare the rejection counts to the original case.
+
+For the Bonferroni correction, we have 997 tests so we have $\alpha=\frac{0.05}{997}\approx 0.00005015$. Now we create a function in R to perform the Bonferroni correction on each vector of $p$-value.
+\begin{verbatim}
+    bonftest<-function(a){
+     t<- a > 0.00005015
+     summary(t)["FALSE"]
+    }
+\end{verbatim}
+
+For the Benjamini Hochberg procedure, 
+
+\begin{table}[h]
+    \centering
+    \begin{tabular}{|c|c|c|c|}
+       \hline
+       Variable & Original Rej. (mean) & Bonferroni (mean) & BH (mean)\\
+       \hline
+        Danceability &129 &6&\\
+        \hline
+        Energy &156 &9&\\
+        \hline
+        Loudness &190 &30&\\
+        \hline
+        Speechiness &126 &6&\\
+        \hline
+        Acousticness &159 &11&\\
+        \hline
+        Liveness & 76&3&\\
+        \hline
+        Valence & 110&4&\\
+        \hline
+    \end{tabular}
+    \caption{Caption}
+    \label{table 4}
+\end{table}
 
 
+\begin{table}[h]
+    \centering
+    \begin{tabular}{|c|c|c|c|}
+       \hline
+       Variable & Original Rej. (median) & Bonferroni (median) & BH (median)\\
+       \hline
+        Danceability &125 &7&\\
+        \hline
+        Energy & 152&8&\\
+        \hline
+        Loudness & 173&21&\\
+        \hline
+        Speechiness & 119&4&\\
+        \hline
+        Acousticness &135 &11&\\
+        \hline
+        Liveness &52 &0&\\
+        \hline
+        Valence & 118&3&\\
+        \hline
+    \end{tabular}
+    \caption{Caption}
+    \label{table 5}
+\end{table}
 
-
-
-
-
+\begin{table}[h]
+    \centering
+    \begin{tabular}{|c|c|c|c|}
+        \hline
+        Variable & Original Rej. Counts & Bonferroni & BH\\
+        \hline
+        Tempo & 546 & 155 & \\
+        \hline
+    \end{tabular}
+    \caption{Caption}
+    \label{table 6}
+\end{table}
 
 
 
