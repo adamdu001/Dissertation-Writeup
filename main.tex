@@ -80,8 +80,33 @@ Email: a.du.3@warwick.ac.uk \\
 
 % -------------------------------------------------
 % abstract and acknowledgement
+\hfill
 
+\hfill
 
+\hfill
+
+\hfill
+
+\section*{Abstract}
+We will study the card shuffling theory and rigorously prove why $n\log n$ top in at random shuffles are enough to shuffle perfectly. We will see some famous examples of misperception of randomness. Afterwards, we will perform data extraction and analysis on the Spotify Million Playlists. Then, we will apply runs test to the extracted data. Next, we will study how to construct the k-category extension of the runs test and how to design it in R. Furthermore, we will focus on the multiple testing problem, by introducing key concepts including FWER, FDR. Finally, we will prove the theorem of Benjamini-Hochberg procedure and see whether the Bonferroni correction and Benjamini-Hochberg procedure will make any difference on our existing results.
+
+\hfill
+
+\hfill
+
+\hfill
+
+\hfill
+
+\section*{Acknowledgement}
+I would like to express my gratitude to my supervisor Dr. Julia Brettschneider for being sincerely involved in this project and giving me valuable support and useful guidance. 
+
+Further, I would like to thank Jord Cheah for giving me access to his code on data extraction.
+
+Finally, I would like to thank my parents, Bianjiang and Dongxia, and my love, Eleanor, for their invaluable love, support and encouragement.
+
+\clearpage
 % -------------------------------------------------
 
 \tableofcontents
@@ -91,8 +116,18 @@ Email: a.du.3@warwick.ac.uk \\
 % -------------------------------------------------
 
 \section{Introduction}
+What is randomness? What is randomness in a music playlist? If a music playlist is not random, how can we detect it? Are there any deficiencies for our method of detecting non-randomness? These 4 questions build a rough structure of this dissertation.
 
+We will firstly study the construction of Top-in-at-random shuffle and riffle shuffle in card shuffling theories; and also we will figure out why $n\log n$ top in at random shuffles are enough to shuffle a deck of cards. By doing so, we will be having the theoretical background to understand any similar shuffling process. Then, we will move on to psychology studies on perception of randomness and see how human's perception of randomness is biased with high alternation and overbalancing in short regions. 
 
+Afterwards, we will see how we connect the idea of randomness to the music playlists data by introducing the Million Playlists Dataset, performing data extraction and doing exploratory data analysis. In the process of doing EDA, we will find the 997 playlists collectively do not exhibit any remarkable patterns but only noise, implying the need to use the runs test to examine the playlists individually.
+
+We will construct the runs test statistic and see how to compute $p$-value by hand through studying the distribution of runs. In the application of runs test, we will see how to use R to iteratively apply the test to hundreds of playlists.
+
+A particular concern should be raised to the variable Tempo, which has 2 peaks, implying the use of extended runs test. Thus we will see how the test statistic is constructed and how the function in R are set up step by step. 
+
+Another concern that will be discussed is the multiple testing problem since we will be doing nearly 1000 hypothesis tests at the same time. In order to introduce some correction methods like the Bonfferoni correction and the false discovery rate, we will first introduce some basic concepts like Type I and Type II Error, which is the cornerstone of this topic. Then, family-wise error rate will be studied and discussed. Then, we will see how the Bonferroni correction is essentially a control on FWER, and the Benjamini-Hochberg procedure is a control on FDR on the other hand. The relationship between FDR and FWER will be studied and proved. After that, we will prove a very difficult lemma which leads to the proof of the Benjamini-Hochberg procedure. Finally, we will apply the correction methods to our data and compare the difference between the original rejections and current rejections, and also contrast two correction methods based on the performance, lemmas and remarks.
+\clearpage
 \section{Shuffling Theory}
 \subsection{Top in at Random Shuffle}
 
@@ -387,8 +422,6 @@ A famous example for the local representativeness effect is the gambler's fallac
 \newpage
 
 
-
-
 \section{Randomness in Playlists}
 In the previous section, we have seen how the distribution of a deck of cards can be modelled, and how to construct the top in at random shuffle and riffle shuffle; moreover, we are clear now why randomness is described by the uniform distribution. Apart from this, in the view of various psychology papers, we notice that some perceived "patterned" event turned out to be clumping of random events. This is called the misperception of randomness.
 
@@ -517,11 +550,6 @@ The aim of these box plots is to see whether the distribution of the first sever
 Overall, though non-randomness might exist in individual playlists, it cannot be captured in a comparison between the collective distributions of 1000 first songs, 1000 second songs, ..., etc, unless some strict, unrealistic assumptions are made. 
 
 \newpage
-
-
-
-
-
 
 
 \section{Runs Test}
@@ -772,11 +800,6 @@ Though the K-category extension of the runs test is used here, a more powerful v
 
 
 \newpage
-
-
-
-
-
 
 
 \section{Multiple Testing Problem}
@@ -1187,8 +1210,6 @@ The results of these two correction methods are summarised in Table \ref{table 4
 \clearpage
 
 
-
-
 \section{Conclusion}
 We have constructed the model for Top-in-at-random shuffle and riffle shuffle based on Diaconis(1986), where we studied why $nlogn$ top in at random shuffles are enough to shuffle a deck of cards.These have given us an intuition and mathematical background to understand any similar shuffling process. Then, we moved on to psychology studies on perception of randomness, where we saw strong evidence that human's perception of randomness is biased with high alternation and overbalancing in short regions. Afterwards, we saw how we connect the idea of randomness to the music playlists data by introducing the Million Playlists Dataset, performing data extraction and doing exploratory data analysis. 
 
@@ -1196,7 +1217,7 @@ However, in the process of doing EDA, we found the 997 playlists collectively di
 
 A particular concern has been raised to the variable Tempo, which has 2 peaks, implying the use of extended runs test. Thus we saw how the test statistic was constructed and how the function in R were set up step by step. Then we applied these to our data giving us the results for the variable Tempo.
 
-Another concern was about the multiple testing problem since we were doing nearly 1000 hypothesis tests at the same time. In order to introduce some correction methods like the Bonfferoni correction and the false discovery rate, we first introduced some basic concepts like Type I and Type II Error, which is the cornerstone of this topic. Then, family-wise error rate was studied and discussed. Then, we see how the Bonferroni correction is essentially a control on FWER, and the Benjamini-Hochberg procedure is a control on FDR on the other hand. The relationship between FDR and FWER was studied and proved. After that, we proved a very difficult lemma which leads to the proof of the Benjamini-Hochberg procedure. Finally, we applied the correction methods to our data and compared the difference between the original rejections and current rejections, and also con
+Another concern was about the multiple testing problem since we were doing nearly 1000 hypothesis tests at the same time. In order to introduce some correction methods like the Bonfferoni correction and the false discovery rate, we first introduced some basic concepts like Type I and Type II Error, which is the cornerstone of this topic. Then, family-wise error rate was studied and discussed. Then, we see how the Bonferroni correction is essentially a control on FWER, and the Benjamini-Hochberg procedure is a control on FDR on the other hand. The relationship between FDR and FWER was studied and proved. After that, we proved a very difficult lemma which leads to the proof of the Benjamini-Hochberg procedure. Finally, we applied the correction methods to our data and compared the difference between the original rejections and current rejections, and also contrasted two correction methods based on the performance, lemmas and remarks.
 
 Here are some possible working directions in the future:
 \begin{itemize}
@@ -1240,6 +1261,8 @@ Here are some possible working directions in the future:
 \newpage
 \printbibliography[heading=bibintoc,title={References}]
 \newpage
+
+
 \begin{appendices}
 \section{Code for Data Extraction}
 \begin{verbatim}
@@ -1587,4 +1610,5 @@ BH(P.tempo)
 
 \end{verbatim}
 \end{appendices}
+
 \end{document}
