@@ -1106,87 +1106,104 @@ For the Bonferroni correction, we have 997 tests so we have $\alpha=\frac{0.05}{
     }
 \end{verbatim}
 
-For the Benjamini Hochberg procedure, 
+For the Benjamini Hochberg procedure, we compare the $i$-th smallest entry of a vector with $\frac{i\times 0.05}{997}$. To locate such $i$, we use the $match$ function where $match(a[i],sort(a))$ finds the rank (from small to big since we sort the vector in the increasing order) of size of $a[i]$. The R code is as follows.
+\begin{verbatim}
+    BH<-function(a){
+      asort<-sort(a)
+      t<-rep(0,997)
+      for (i in 1:997) {
+        t[i] <- a[i] > match(a[i],asort) * (0.05/997)
+      }
+      nrow(as.data.frame(which(t==FALSE)))
+    }
+\end{verbatim}
 
-\begin{table}[h]
-    \centering
-    \begin{tabular}{|c|c|c|c|}
-       \hline
-       Variable & Original Rej. (mean) & Bonferroni (mean) & BH (mean)\\
-       \hline
-        Danceability &129 &6&\\
-        \hline
-        Energy &156 &9&\\
-        \hline
-        Loudness &190 &30&\\
-        \hline
-        Speechiness &126 &6&\\
-        \hline
-        Acousticness &159 &11&\\
-        \hline
-        Liveness & 76&3&\\
-        \hline
-        Valence & 110&4&\\
-        \hline
-    \end{tabular}
-    \caption{Caption}
-    \label{table 4}
-\end{table}
+The results of these two correction methods are summarised in Table \ref{table 4}, \ref{table 5} and \ref{table 6}.
 
 
-\begin{table}[h]
-    \centering
-    \begin{tabular}{|c|c|c|c|}
-       \hline
-       Variable & Original Rej. (median) & Bonferroni (median) & BH (median)\\
-       \hline
-        Danceability &125 &7&\\
-        \hline
-        Energy & 152&8&\\
-        \hline
-        Loudness & 173&21&\\
-        \hline
-        Speechiness & 119&4&\\
-        \hline
-        Acousticness &135 &11&\\
-        \hline
-        Liveness &52 &0&\\
-        \hline
-        Valence & 118&3&\\
-        \hline
-    \end{tabular}
-    \caption{Caption}
-    \label{table 5}
-\end{table}
-
-\begin{table}[h]
+\begin{table}[h!]
     \centering
     \begin{tabular}{|c|c|c|c|}
         \hline
         Variable & Original Rej. Counts & Bonferroni & BH\\
         \hline
-        Tempo & 546 & 155 & \\
+        Tempo & 546 & 155 & 465\\
         \hline
     \end{tabular}
-    \caption{Caption}
-    \label{table 6}
+    \caption{\textbf{Comparison between original rejection counts of variable Tempo and the new rejection counts using the Bonferroni correction and the Benjamini-Hochberg process respectively.} By its mathematical nature, the Bonferroni method tends to be more stringent than the Benjamini-Hochberg method. In particular, the Bonferroni only allows for 155 rejections, which is a 3-time reduction from the original counts 546, whereas BH methods only cut off around 90 rejections from the original counts. Through controlling the proportion of false rejections out of rejections (FDR), we achieve a less stringent outcome. However, if number the false null is very smaller, FDR's performance will be very close to the stringent FWER, as discussed in Lemma 6.}
+    \label{table 4}
+\end{table}
+
+\begin{table}[h!]
+    \centering
+    \begin{tabular}{|c|c|c|c|}
+       \hline
+       Variable & Original Rej. (thres. mean) & Bonferroni & BH \\
+       \hline
+        Danceability &129 &6&16\\
+        \hline
+        Energy &156 &9&34\\
+        \hline
+        Loudness &190 &30&53\\
+        \hline
+        Speechiness &126 &6&21\\
+        \hline
+        Acousticness &159 &11&36\\
+        \hline
+        Liveness & 76&3&4\\
+        \hline
+        Valence & 110&4&8\\
+        \hline
+    \end{tabular}
+    \caption{\textbf{Comparison between the original rejection counts of different audio features and the new rejection counts using the Bonferroni correction and the Benjamini-Hochberg process respectively.} The mean is used as threshold in this table. Generally the Bonferroni method is much more stringent than the BH method. In the Bonferroni column, the maximum is 30 rejections in Loudness; however, it is already 6 times smaller than before. The rejection for others are much lower, i.e. 3 in Liveness which is 25 times smaller, 4 in Valence which is 27.5 times smaller. BH method, on the other hand, is less stringent, i.e. for Danceability, Energy, etc, 2 to 3 times more rejections are allowed compared with Bonferroni. However, it does not change much on Liveness (4 rejections) compared to Bonferroni (3), probably because the true positive S is too small, so hardly can FDR gain more power from the stringent upper bound FWER, as discussed in the remark of Lemma 7. }
+    \label{table 5}
 \end{table}
 
 
+\begin{table}[h!]
+    \centering
+    \begin{tabular}{|c|c|c|c|}
+       \hline
+       Variable & Original Rej. (thres. median) & Bonferroni & BH\\
+       \hline
+        Danceability &125 &7&15\\
+        \hline
+        Energy & 152&8&33\\
+        \hline
+        Loudness & 173&21&48\\
+        \hline
+        Speechiness & 119&4&16\\
+        \hline
+        Acousticness &135 &11&31\\
+        \hline
+        Liveness &52 &0&0\\
+        \hline
+        Valence & 118&3&6\\
+        \hline
+    \end{tabular}
+    \caption{\textbf{Comparison between original rejection counts of different audio features and the new rejection counts using the Bonferroni correction and the Benjamini-Hochberg process respectively.} The median is used as threshold in this table. Generally the Bonferroni method is much more stringent than the BH method. Again we notice that the Bonferroni method has led to a great reduction in rejections, i.e. Valence has only 3 rejections left, which is nearly 40 times smaller than the original case. Notably, Liveness has 0 rejections in this case. The BH method is less stringent in a sense that more rejections are allowed, but Liveness is again 0. This is probably because there does not exist false null hypotheses, FDR=FWER, as discussed in Lemma 6. }
+    \label{table 6}
+\end{table}
+\clearpage
 
 
 
 
-
-
-
-
-
-
-
-\newpage
 \section{Conclusion}
-I have designed a function for k-category extension of runs test.
+We have constructed the model for Top-in-at-random shuffle and riffle shuffle based on Diaconis(1986), where we studied why $nlogn$ top in at random shuffles are enough to shuffle a deck of cards.These have given us an intuition and mathematical background to understand any similar shuffling process. Then, we moved on to psychology studies on perception of randomness, where we saw strong evidence that human's perception of randomness is biased with high alternation and overbalancing in short regions. Afterwards, we saw how we connect the idea of randomness to the music playlists data by introducing the Million Playlists Dataset, performing data extraction and doing exploratory data analysis. 
+
+However, in the process of doing EDA, we found the 997 playlists collectively did not exhibit any remarkable pattern but only noise, so we instead examined the 997 playlists one by one by using the runs test. We introduced the test statistic of runs test when $n$ is big, and we studied the distribution of runs in detail, which enabled us to compute $p$-values by hand. In the application of runs test, we saw how to use R to iteratively apply the test to hundreds of playlists, and then we summarised the result of the number of rejections in several tables. 
+
+A particular concern has been raised to the variable Tempo, which has 2 peaks, implying the use of extended runs test. Thus we saw how the test statistic was constructed and how the function in R were set up step by step. Then we applied these to our data giving us the results for the variable Tempo.
+
+Another concern was about the multiple testing problem since we were doing nearly 1000 hypothesis tests at the same time. In order to introduce some correction methods like the Bonfferoni correction and the false discovery rate, we first introduced some basic concepts like Type I and Type II Error, which is the cornerstone of this topic. Then, family-wise error rate was studied and discussed. Then, we see how the Bonferroni correction is essentially a control on FWER, and the Benjamini-Hochberg procedure is a control on FDR on the other hand. The relationship between FDR and FWER was studied and proved. After that, we proved a very difficult lemma which leads to the proof of the Benjamini-Hochberg procedure. Finally, we applied the correction methods to our data and compared the difference between the original rejections and current rejections, and also con
+
+Here are some possible working directions in the future:
+\begin{itemize}
+    \item Since the playlist data we extracted are not specifically designed to feel random (which is not random), it makes sense that we have no enough evidence to reject $H_0$, except for the three-category variable Tempo, which still have nearly half rejections after applying the Benjamini-Hochberg process. Does this mean there actually exist some real patterns in Tempo as we go through half of the playlists? If yes, why it is isolated from other variables which only have a small number of rejections?
+    \item The construction of the R function of runs test extension is somehow like using a shortcut because I manually wrote the 2 thresholds within the function instead of allowing it to be a variable in the input. Also, for simplicity I delete the part of code which creates figures about the extended runs test. Therefore, a more complete version of such R function could be created.
+    \item As I mentioned in the last part of section 4.4, the effect of using different choice of threshold for extended runs test should be carefully examined. As you can see in Table \ref{table 1}, when there is no extension of runs test, switching from mean to median does not create a huge difference, but when it happens for the extended runs test, will there be huge difference? If yes, why? If no, also why? Moreover, are there any "golden standards" to choose the most appropriate thresholds for a k-category runs test? 
+\end{itemize}
 
 
 
@@ -1313,7 +1330,7 @@ def json_extract(obj, key):
 # #Extracting all playlist lengths and converting to an array
 # lengths = json_extract(playlists, 'num_tracks')
 \end{verbatim}
-\section{Code for EDA and Runs Tests}
+\section{Code for EDA, Runs Tests and Correction Methods for Multiplicity}
 \begin{verbatim}
 library(randtests)
 library(readr)
@@ -1536,6 +1553,38 @@ RT.KEXT<-function(a){ #a is a vector like danceability
 #apply it on the tempo
 P.tempo<-RT.KEXT(song$tempo)
 nrow(as.data.frame(which(P.tempo<0.05)))
+
+bonftest<-function(a){
+  t<- a > 0.00005015
+  summary(t)["FALSE"]
+}
+bonftest(P.dance)
+bonftest(P.acousticness)
+bonftest(P.energy)
+bonftest(P.liveness)
+bonftest(P.loudness)
+bonftest(P.speechiness)
+bonftest(P.valence)
+bonftest(P.tempo)
+
+BH<-function(a){
+  asort<-sort(a)
+  t<-rep(0,997)
+  for (i in 1:997) {
+     t[i] <- a[i] > match(a[i],asort) * (0.05/997)
+  }
+  nrow(as.data.frame(which(t==FALSE)))
+}
+BH(P.dance)
+BH(P.energy)
+BH(P.loudness)
+BH(P.speechiness)
+BH(P.acousticness)
+BH(P.liveness)
+BH(P.valence)
+BH(P.tempo)
+
+
 \end{verbatim}
 \end{appendices}
 \end{document}
