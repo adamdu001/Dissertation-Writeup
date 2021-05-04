@@ -919,12 +919,12 @@ Now if we take expectation on both sides,
 By lemma 7, any control on FWER will also control FDR since FDR is bounded above by FWER. However, when $S$ gets larger, i.e. more hypotheses are non-true, the proportion for the false rejection $Q$ gets lower. Thus, the FDR will be lower and there will be a greater difference between FDR and FWER. We say the stringency of this upper bound becomes lower and we expect a gain in power.\cite{5.3}\cite{5.7}
 \end{remark}
 
-Next let me define the Benjamini-Hochberg procedure, in which we control the FDR.
+Next let me define the Benjamini-Hochberg procedure, in which we control the FDR. 
 \begin{definition}
 The Benjamini-Hochberg procedure is defined as follows \cite{5.7}:
 \begin{itemize}
     \item Consider testing $m$ independent null hypotheses $H_1,\cdots,H_m$ based on their respective $p$-values, $P_1,\cdots,P_m$.
-    \item Sort the $p$-values in increasing order, i.e. $P_{(1)}<P_{(2)}<\cdots<P_{(m)}$. $P_{(i)}$ corresponds to the null hypothesis $H_{(i)}$.
+    \item Sort the $p$-values in increasing order, i.e. $P_{(1)}\leq P_{(2)}\leq\cdots\leq P_{(m)}$. $P_{(i)}$ corresponds to the null hypothesis $H_{(i)}$.
     \item $k=\max\{i: P_{(i)}< q^*\cdot \frac{i}{m}\}$
     \item Reject all $H_{(1)},\cdots,H_{(k)}$.
 \end{itemize}
@@ -936,20 +936,162 @@ The Benjamini-Hochberg procedure is defined as follows \cite{5.7}:
 
 \begin{theorem}
 The Benjamini-Hochberg procedure controls the FDR at $q^*$
-for independent hypothesis tests. \cite{5.7}
+for independent hypothesis tests and for any configurations of false null hypotheses (for any $V,S$ in $R$). \cite{5.7}
 \end{theorem}
 
+Lemma 8 is needed to prove Theorem 4. Now let me list all notations \cite{5.3} we need for the following lemmas and proofs.
+\begin{itemize}
+    \item Null hypothesis: $H_1,\cdots,H_m$
+    \item Ordered null hypothesis: $H_{(1)},\cdots,H_{(k)}$
+    \item $p$-values corresponding to the null hypotheses: $P_1,\cdots,P_m$
+    \item Ordered $p$-values corresponding to the null hypotheses: $P_{(1)}\leq P_{(2)}\leq\cdots\leq P_{(m)}$
+    \item Ordered $p$-values corresponding to true null hypotheses: $X_1\leq \cdots\leq X_i\leq \cdots\leq X_{m_0}$
+    \item Ordered $p$-values corresponding to false null hypotheses: $Z_1\leq \cdots\leq Z_j\leq \cdots\leq Z_{m_1}$
+\end{itemize}
 
 
-
-\begin{lemma}\cite{5.7}
-Suppose there are $m$ independent $p$-values from $m$ independent hypotheses tests. As defined in Table \ref{table 3}, $m_0$ and $m_1$ are the total number of tests with $H_0$ true and $H_0$ false respectively.
+\begin{lemma}\cite{5.3}\cite{5.7}
+Let $m_0\in[0,m]$ be the number of independent $p$-values corresponding the true null hypotheses. Let $m_1=m-m_0$ be the number of $p$-values corresponding the false null hypotheses $Z_1,\cdots,Z_{m_1}$. Suppose that the $p$-values for the false null hypotheses have the realisations $Z_1=z_1,\cdots,Z_{m_1}=z_{m_1}.$
+Then, the Benjamini-Hochberg procedure satisfies\[
+E[Q|Z_1=z_1,\cdots,Z_{m_1}=z_{m_1}]\leq \frac{m_0}{m}q^*
+\]
 \end{lemma}
 
+\begin{proof} \cite{5.3} We will prove this lemma by induction.\\
+\underline{\textbf{Base Case}}\; Suppose $m=1$, we either have $m_0=0$ or $m_1=1$. For $m_0=0$, there does not exist true null but only a false null, thus there will be no false rejections, i.e. $V=0$, and then $Q=0$. Thus $$E[Q|Z_1=z_1]=0=\frac{m_0}{m}q^*.$$
+For $m_0=1$, there is 1 true null $X_1$. If it gets accepted, $V=R=Q=0$; if it gets rejected, $V=R=Q=1$. Thus
+\begin{align*}
+    E[Q|Z_1=z_1]&=0\times P(Q=0)+1\times P(Q=1)\\
+    &=P(Q=1)\\
+    &=P(X_{(1)}\leq \frac{1}{1}q^*)\\
+    &=P(X_{(1)}\leq q^*)\\
+    &=q^*
+\end{align*}
+The third line is a direct use of definition of the Benjamini-Hochberg procedure. The fifth line is because the $p$-values corresponding to the true null are $Uniform(0,1)$ random variables.
+
+\underline{\textbf{Induction Case}}\; Suppose the lemma is true for all $m\leq k$. We are going to prove it holds for $m=k+1$. To do this, we split the problem into 2 cases, i.e. $m_0=0$ and $m_0>0$. For $m_0=0$ case, exactly same reasoning in the base case can be applied here: there does not exist true null, thus there will be no false rejections, i.e. $V=0$, and then $Q=0$. Thus $$E[Q|Z_1=z_1,\cdots,Z_{m_1}=z_{m_1}]=0=\frac{m_0}{k+1}q^*.$$
+
+Now let us consider $m_0>0$. Recall we have the ordered $p$-values corresponding to false null hypotheses: 
+$$Z_1\leq \cdots\leq Z_j\leq \cdots\leq Z_{m_1},$$ 
+Define \[
+j_0:=\max_{0\leq j\leq m_1}\left\{j:z_j\leq
+\frac{m_0+j}{k+1}q^*\right\}
+\]
+\textbf{Important Note 1: we want this $\mathbf{j_0}$ to play the role of k in Definition 4, i.e. the $\mathbf{j_0}$-th p-value is a threshold for stopping rejection, but we keep rejecting until $\mathbf{j_0}$.}
+
+Then let\[
+z_{j_0}\leq z':=\frac{m_0+j_0}{k+1}q^*
+\]
+
+\textbf{Important Note 2: from this setting, in an increasingly sorted sequence of p-values, if z' is somewhere in the sequence, anything before z' should be rejected by construction.}
+
+\textbf{Important Note 3: continued from Important Note 2, by the very definition of z', as well as the Benjamini-Hochberg procedure, we would have rejected $\mathbf{m_0+j_0}$ hypotheses (either true null or false null) at z' in total.}
+
+Next, we will condition the $E[Q|Z_1=z_1,\cdots,Z_{m_1}=z_{m_1}]$ on $X_{m_0}=p$, the largest $p$-value corresponding to true null hypotheses, by integrating over all possible values $p\in[0,1]$, i.e. 
+
+\begin{gather}
+E[Q|Z_1=z_1,\cdots,Z_{m_1}=z_{m_1}]=\int_0^1 E[Q,X_{m_0}=p|Z_1=z_1,\cdots,Z_{m_1}=z_{m_1}]dp\\
+=\int_0^1E[Q|X_{m_0}=p,Z_1=z_1,\cdots,Z_{m_1}=z_{m_1}]P[X_{m_0}=p|Z_1=z_1,\cdots,Z_{m_1}=z_{m_1}]dp\\
+=\int_0^1E[Q|X_{m_0}=p,Z_1=z_1,\cdots,Z_{m_1}=z_{m_1}]P[X_{m_0}=p]dp\\
+=\int_0^{z'}E[Q|X_{m_0}=p,Z_1=z_1,\cdots,Z_{m_1}=z_{m_1}]P[X_{m_0}]dp\;+\\\int_{z'}^1E[Q|X_{m_0}=p,Z_1=z_1,\cdots,Z_{m_1}=z_{m_1}]P[X_{m_0}]dp
+\end{gather}
+
+(8) is pretty straight forward. (9) is because we moved $X_{m_0}=p$ into the "condition side" in the expectation. (10) is because $X_{m_0}$ is independent of any $Z_j$, since $X_{m_0}$ is the largest $p$-value corresponding to true null hypotheses and $Z_j$'s are the $p$-values corresponding to false null hypotheses. All $p$-values are independent with each other. In (11) and (12), we split the integral using a cut-off point $z'$ as defined above. Then if we can prove the sum of (11) and (12) to be the RHS of lemma 8 the proof is complete.
+
+Now for (11), where $X_{m_0}=p\in [0,z']$, $$E[Q|X_{m_0}=p,Z_1=z_1,\cdots,Z_{m_1}=z_{m_1}]=\frac{m_0}{m_0+j_0}$$
+
+Here is the explanation. This conditional expectation of $Q$ given some information is essentially asking for a ratio of number of false rejections to total false rejections, based on some information. Note that all $p$-values corresponding to the true null are no larger than $z'$ by construction, i.e. $x_1\leq \cdots\leq x_i\leq \cdots\leq x_{m_0}=p\leq z'$. By the Benjamini-Hochberg procedure and Important Note 1 and 2, all $m_0$ true null are rejected. So the number of false rejections is $m_0$. By Important Note 3, the total number of rejection (both false null and true null) is $m_0+j_0$. 
+
+Now if we substitute this conditional expectation back to (11), we have
+\begin{align}
+    \int_0^{z'}E[Q|X_{m_0}=p,Z_1=z_1,\cdots,Z_{m_1}=z_{m_1}]P[X_{m_0}=p]dp 
+    &=\int_0^{z'}\frac{m_0}{m_0+j_0}P[X_{m_0}=p]dp\\
+    &=\frac{m_0}{m_0+j_0}\int_0^{z'}m_0p^{m_0-1}dp\\
+    &=\frac{m_0}{m_0+j_0}(z')^{m_0}
+\end{align}
+
+(13) is a direct substitution. (14) uses a simple fact as follows. Let $A_1,\cdots,A_n$ be independent variables each with CDF $F(a)$. Let $F_{(i)}(a),i \in \{1,\cdots,n\}$ be the CDF of the $i$-th order statistic $A_{(i)}$ and $A_{(1)}\leq A_{(2)}\leq \cdots \leq A_{(n)}$. Then CDF of $A_{(n)}$ is given by \[
+F_{(n)}(a)=P(A_{(n)}\leq a)=\prod_iP(A_i\leq a)=F(a)^n
+\]
+
+Then the corresponding PMF $f_{(n)}(a)$ is \[
+f_{(n)}(a)=\frac{d}{dy}F_{(n)}(a)=nF(a)^{n-1}
+\]
+If $A\sim U(0,1)$,
+\[ f_{(n)}(a)=na^{n-1}\]
+
+Here in (14) we do use the above fact that $X\sim U(0,1)$ and write the PMF in the above pattern. (15) is simply a step for integration.
+
+Finally, take out one $z'$ and use its definition, we have
+\begin{equation}
+ \frac{m_0}{m_0+j_0}z'(z')^{m_0-1}
+\leq \frac{m_0}{m_0+j_0}\frac{m_0+j_0}{k+1}q^*(z')^{m_0-1}=\frac{m_0}{k+1}q^*(z')^{m_0-1}   
+\end{equation}
+
+Now, we have computed (11). We proceed with (12), where $X_{m_0}=p\in(z',1]$. We should bear in mind that \[
+Z_1\leq Z_2 \leq \cdots \leq Z_{j_0} \leq Z' < Z_{j_0+1} \leq \cdots \leq Z_{m_1}
+\]
+\textbf{Important Note 4: when the p-values are ordered this way, by the definition of Z' and the construction of the Benjamini-Hochberg procedure, $\mathbf{Z_1,...,Z_{j_0}}$ should be rejected, and $\mathbf{Z_{j_0+1},...,Z_{m_1}}$ should be accepted. Z' takes value in $\mathbf{[z_{j_0},z_{j_0+1})}$. }
+
+Neither $X_{m_0}=p\in(z',z_{j_0+1})$ nor $X_{m_0}=p\in[z_{j_0+1},z_{m_1})$ will result any rejections of $X_{m_0}, z_{j+1},\cdots,z_{m_1} $by the Benjamini-Hochberg procedure and the definition of $z'$. Note that we have set $j_0=j$. Now, apart from $X_{m_0}, z_{j+1},\cdots,z_{m_1}$, what null hypotheses are left over? For the true null, we have (by excluding $X_{m_0}$) $m_0-1$. Similarly we have $j$ false null left. This implies that there are $m_0+j-1$ null hypotheses subject to rejection.
+
+Now we wish to use the induction assumption on $E[Q|X_{m_0}=p,Z_1=z_1,\cdots,Z_{m_1}=z_{m_1}]$, but we need to find a way to get rid of the $X_{m_0}=p$. It turns out to be useful to do some transformations.
+\begin{equation*}
+    \begin{split}
+    m_0'&=m_0-1\\
+    m_1'&=j\\
+    m'&=m_0+j-1 \;\;\;s.t.\;\;\; m'<k+1=m
+    \end{split}
+\end{equation*}
+If all $m'$ null hypotheses are combined and ordered, then by the Benjamini-Hochberg procedure \(H_{(i)}\) is rejected when there exists some $t\in [i,m_0+j-1]$ such that  \[
+P_{(t)}\leq \frac{t}{k+1}q^*.
+\]
+
+Then we keep on transforming the variables for null hypotheses discussed here:
+\begin{equation*}
+    \begin{split}
+    X_i' &= \frac{X_i}{p}\;\;\; \text{where} \;\;\;i ={1,2,\cdots,m_0-1} \\
+    Z_i' &= \frac{Z_i}{p}\;\;\; \text{where}\;\;\; i ={1,2,\cdots,j} \\
+    {q^*}'&=\frac{m_0+j-1}{(k+1)p}q^*\\
+    \end{split}
+\end{equation*}
+Now $X_i'$ are $p$-statistics corresponding to $m_0-1$ true null (independent standard uniform random variables), and $Z_i'$ are $p$-statistics corresponding to $j$ false null. If $Y=\{X,Z\}=\{X_1,\cdots,X_{m_0},Z_1,\cdots,Z_{m_1}\}$ and $Y'=\{X',Z'\}=\{X_1',\cdots,X_{m_0-1}',Z_1',\cdots,Z_{j}'\}$, then \[Y_i'\leq \frac{i}{m'}{q^*}'\;\;\;\iff\;\;\;Y_i\leq \frac{i}{m}q^*
+\]
+This means the false discovery proportion $Q$ of $X_1,\cdots,X_{m_0},Z_1,\cdots,Z_{m_1}$ at $q^*$ is the same as testing $X_1',\cdots,X_{m_0-1}',Z_1',\cdots,Z_{j}'$ at ${q^*}'$. Then, we can eliminate $X_{m_0}=p$ in  $E[Q|X_{m_0}=p,Z_1=z_1,\cdots,Z_{m_1}=z_{m_1}]$ by above settings and use the inductive hypothesis, i.e.
+\begin{align*}
+    E[Q|X_{m_0}=p,Z_1=z_1,\cdots,Z_{m_1}=z_{m_1}] 
+    &=E\left[Q|Z_1'=\frac{z_1}{p},\cdots,Z_{j}'=\frac{z_j}{p}\right]\\
+    &=\frac{m_0'}{m'}{q^*}'\\
+    &=\frac{m_0-1}{m_0+j-1}\frac{m_0+j-1}{(k+1)p}q^*\\
+    &=\frac{m_0-1}{(k+1)p}q^*
+\end{align*}
+
+Thus, (12) becomes
+\begin{align*}
+\int_{z'}^1E[Q|X_{m_0}=p,Z_1=z_1,\cdots,Z_{m_1}=z_{m_1}]P[X_{m_0}]dp 
+&= \int_{z'}^1 \frac{m_0-1}{(k+1)p}q^*P[X_{m_0}]dp\\
+&=\int_{z'}^1 \frac{m_0-1}{(k+1)p}q^*m_0p^{m_0-1}dp\\
+&=\int_{z'}^1 \frac{m_0-1}{(k+1)}q^*m_0p^{m_0-2}dp\\
+&=\frac{m_0}{k+1}q^*\int_{z'}^1(m_0-1)p^{m_0-2}dp\\
+&=
+\end{align*}
+
+
+
+\end{proof}
+
+
+
+
+\textbf{Proof of Theorem 4}
+\begin{proof} \cite{5.3}\cite{5.7}
+From lemma 8, 
+\end{proof}
 
 \newpage
 \subsection{Application}
-After seeing these methods of controlling the Type I Error, let us see in practice what effect will these methods have on our data.
+In section 4 we performed the counting of number of rejections after producing vectors of $p$-values. Now what we really need is those vectors. For each music feature, it has 1 corresponding vectors of $p$-values representing 997 times of hypothesis test. In the following, I will perform the Bonferroni correction and the Benjamini-Hochberg procedure on each of the $p$-vectors, and then compare the rejection counts to the original case.
+
 
 
 
