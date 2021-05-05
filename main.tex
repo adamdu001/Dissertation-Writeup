@@ -89,7 +89,7 @@ Email: a.du.3@warwick.ac.uk \\
 \hfill
 
 \section*{Abstract}
-We will study the card shuffling theory and rigorously prove why $n\log n$ top in at random shuffles are enough to shuffle perfectly. We will see some famous examples of misperception of randomness in various psychology studies. Afterwards, we will perform data extraction and exploratory analysis on the Spotify Million Playlists, and then apply the runs test to the extracted data. Next, we will see how to construct the k-category extension of the runs test and how to design it in R. Furthermore, we will discuss the multiple testing problem and possible remedies using FWER, FDR. Finally, we will prove the bound on FDR imposed by the Benjamini-Hochberg procedure and see whether the Bonferroni correction and the Benjamini-Hochberg procedure will make any difference on our existing results.
+We will study the card shuffling theory and rigorously prove why $n\log n$ top in at random shuffles are enough to shuffle perfectly. We will see some famous examples of misperception of randomness in various psychology studies. Afterwards, we will perform data extraction and exploratory analysis on the Spotify Million Playlist Dataset, and then apply the runs test to the extracted data. Next, we will see how to construct the k-category extension of the runs test and how to design it in R. Furthermore, we will discuss the multiple testing problem and possible remedies using FWER, FDR. Finally, we will prove the bound on FDR imposed by the Benjamini-Hochberg procedure and see whether the Bonferroni correction and the Benjamini-Hochberg procedure will make any difference on our existing results.
 
 \hfill
 
@@ -133,7 +133,7 @@ In the last section, we raise concerns about the multiple testing problem since 
 
 Imagine there is a deck of n cards. \textit{Top in at random}\cite[Example~1 on \pno~333]{1.1} shuffle refers to the process of randomly inserting the top card of a deck into the deck. A sharp estimate for the number of times the deck needed to be shuffled until it is random is $nlog(n)$. Before going into a rigorous construction of this idea, let us look at the intuition behind it. If some cards get inserted under the original bottom card, we call these cards well-shuffled because all relative orders of these cards are equally likely. Then, the whole deck is well-shuffled as long as the bottom card comes to the top and gets inserted into the deck. 
 
-Recall that a geometric distribution is a distribution of the number of trails needed to get the first success in repeated Bernoulli trails. Accordingly, the number of trails/time taken for a top card to go under the original bottom card is clearly geometric, with a probability of success $\frac{k}{n}$, where $n$ refers to the total number of cards and $k$ the current position of the original bottom card. This is simply because the top card has $k$ places to go under the original bottom card. Also, note that the expected value for a geometric random variable is the reciprocal of the probability of success, i.e. $E(X)=\frac{1}{p}$. Therefore, the total time taken to perfectly shuffle a deck of cards is approximately $$T = \frac{n}{1} + \frac{n}{2} + \cdots + \frac{n}{n-1} + \frac{n}{n} \approx nlog(n).$$
+Recall that geometric distribution is the distribution of the number of trails needed to get the first success in repeated Bernoulli trails. Accordingly, the number of trails/time taken for a top card to go under the original bottom card is clearly geometric, with a probability of success $\frac{k}{n}$, where $n$ refers to the total number of cards and $k$ the current position of the original bottom card. This is simply because the top card has $k$ places to go under the original bottom card. Also, note that the expected value for a geometric random variable is the reciprocal of the probability of success, i.e. $E(X)=\frac{1}{p}$. Therefore, the total time taken to perfectly shuffle a deck of cards is approximately $$T = \frac{n}{1} + \frac{n}{2} + \cdots + \frac{n}{n-1} + \frac{n}{n} \approx nlog(n).$$
 
 In order to establish this claim rigorously, we first model a step distribution for the \textit{top in at random} shuffle. Consider a permutation group $S_n$, which contains all possible permutations of $n$ objects. Then, $\{Q(\pi):\pi \in S_n\}$ is a step distribution for different steps $\pi$. Note that no matter where the top card goes in each step, the probability for every single step stays uniform, i.e.  $$Q(1)=Q(2,1)=\cdots=Q(n-1,\cdots,1)=Q(n,\cdots,1)=\frac{1}{n}$$ where $(i,i-1,\cdots,1)$ is a cycle notation representing a permutation $\pi$ mapping the first card to the $i$th position and other cards move accordingly. This enables us to further model the multiple-step distribution using convolution\cite[\pno~334]{1.1}: $$Q^k(g)=QQ^{k-1}(g)=\sum_{h\in S_n}Q(h)Q^{k-1}(gh^{-1})$$
 This means, say $k=2$, at the first step we have a permutation $h$, and next we have $gh^{-1}$, and we sum up all possible $h$. To clarify, $gh^{-1}$ is a single permutation with the effect of $h$ being removed from $g$, such that we can achieve a combined permutation of $g$ finally after 2 steps.
@@ -383,7 +383,7 @@ If $T$ is the first time that the binary matrix formed by inverse shuffling has 
 \begin{itemize}
     \item a riffle shuffle creates at most 2 rising sequences.
 \end{itemize}
-Based on this, 2 riffle shuffles create 4 rising sequences at most, 3 create 8 at most, etc. Then, it makes sense to see that the number of riffle shuffles is enough if performing it no longer generates more rising sequences (existing increasing sequences of cards have a length of 1). Equivalently, a deck of cards is perfectly riffle-shuffled when there does not exist increasing sequences of cards. Then,
+Based on this, 2 riffle shuffles create 4 rising sequences at most, 3 create 8 at most, etc. Then, the number of riffle shuffles is enough if performing it no longer generates more rising sequences (existing increasing sequences of cards have a length of 1). Equivalently, a deck of cards is perfectly riffle-shuffled when there does not exist increasing sequences of cards. Then,
 \begin{itemize}
     \item $T$ is a strong uniform time if the deck of cards is perfectly riffle-shuffled at $T$.
 \end{itemize}
@@ -400,11 +400,26 @@ Let $Q$ be a Gilbert-Shannon-Reeds probability distribution defined in Theorem 2
 \end{theorem}
 
 \begin{proof}
-The inequality follows directly from lemma 1. For the equality, consider dropping $n$ balls into $2^k$ boxes. The strong uniform time $T$ in this context is the time that no two balls are in the same box.  Accordingly, $\{T>k\}$ is the event that there exists boxes that contain more than 1 ball. $\{T\leq k\}$ is the event that there are no two or more balls in the same box. 
+The inequality follows directly from lemma 1. For the equality, let us consider dropping $n$ balls into $2^k$ boxes again and again. 
+
+At this moment, treat $n$ as the number of cards in the deck and $2^k$ as the upper bound of the number of the smallest rising sequence (length 1) in an $n$-card deck after k riffle shuffles, assuming it is numbered from 1 to $n$ at the beginning. Now, if I shuffle once ($k=1$), I might create 2 rising sequences. Can my $n$-card deck fit into 2 smallest rising sequence with length 1? Definitely not! If I shuffle twice ($k=2$), can the deck fit into 4 rising sequence each with length 1? Again, no. Repeating this process, at some time $T$, we manage to fit the deck into $2^k$ sequences with length one, and we will have perfectly shuffled the deck by then. Alternatively, at $T$, no two cards occupy one sequence with length 1.
+
+Therefore, in the context of dropping balls, the strong uniform time $T$  is the time that no two balls are in the same box.  Accordingly,
+\begin{itemize}
+    \item $\mathbf{\{T>k\}}$ is the event that $2^k$ boxes each with capacity of 1 ball is not enough to contain $n$ balls. Some balls will aim at the same box. 
+    \item $\mathbf{\{T\leq k\}}$ is the event that $2^k$ boxes each with capacity of 1 ball is now enough to contain all $n$ balls. All balls have their own box.
+\end{itemize}
 
 Clearly, $$P\{T\leq k\}=\prod_{i=1}^{n-1}(1-\frac{i}{2^k}).$$
 \end{proof}
-This upper bound can be explicitly calculated by inputting values of $n$ and $k$. For instance\cite[344]{1.1}, when $n=52$, and $k=10, 11, 12, 13, 14$, the values of the upper bound are 0.73, 0.48, 0.28, 0.15, 0.08 respectively. Furthermore, if $n$ balls are regarded as $n$ people, and $2^k$ boxes as $2^k$ birthdays, the example becomes a famous birthday problem.\cite{1.1}
+
+\begin{remark}
+In the proof, we treat this ball-box example as a card-sequence example. Being able to fit the $n$-card deck into $2^k$ (or less) amount of length-1 sequence is exactly forcing the $n$-card deck to be perfectly shuffled after $k$ shuffles. This is basically the same idea as in Lemma 5. So, this upper bound on the variation distance is fairly reasonable.
+\end{remark}
+
+The upper bound can be explicitly calculated by inputting values of $n$ and $k$. For instance\cite[344]{1.1}, when $n=52$ (just like a ordinary deck of poker cards without the jokers), and $k=10, 11, 12, 13, 14$, the values of the upper bound are 0.73, 0.48, 0.28, 0.15, 0.08 respectively. As you can see, the rate at which the variation distance decreases is very fast through riffle shuffles. 
+
+Furthermore, if $n$ balls are regarded as $n$ people, and $2^k$ boxes as $2^k$ birthdays, the example becomes the birthday problem.\cite{1.1}
 
 \newpage
 \subsection{Perception of Randomness}
@@ -432,7 +447,7 @@ The dataset used in this section is the Million Playlist Dataset (MPD) introduce
 
 In September 2020, Spotify released an identical challenge with the same MPD, and it was the continuation of the RecSys Challenge 2018. The motivation for such a challenge is playlists research. As noted in this blog\cite{2.1}, Spotify would like to learn the nature of playlists and then be able to better capture users' taste through recommending songs and playlists. To be more specific, given a set of playlist features, participants' systems shall generate a list of recommended tracks that can be added to that playlist, i.e. automatic playlist continuation.
 
-I will use this dataset to see how the songs in the playlists distributed and whether or not we can detect any patterns in their distributions.
+I will use this dataset to see how the songs in the playlists are distributed and whether or not we can detect any patterns in their distributions.
 
 \subsection{Data Extraction}
 Since the MPD is huge, I selected one slice of it to work on, i.e. slice 6000-6999. The data is "raw", as you can see that a playlist (truncated to save space) takes the following form\cite{2.1}: 
@@ -485,7 +500,7 @@ That is why we need to do the data extraction: for a good analysis of the random
     \item Write the final output of audio features to a \textit{csv.} file.
 \end{itemize}
 
-Besides, let me explain what does different music features mean. These definitions are based on \cite{2.3}.
+Besides, let me explain what does different music features mean. These definitions are from \cite{2.3}.
 \begin{itemize}
     \item \textbf{Danceability:} Danceability describes how suitable a track is for dancing based on a combination of musical elements including tempo, rhythm stability, beat strength, and overall regularity. A value of 0.0 is least danceable and 1.0 is most danceable.
     \item \textbf{Energy:} Energy is a measure from 0.0 to 1.0 and represents a perceptual measure of intensity and activity. Typically, energetic tracks feel fast, loud, and noisy. 
@@ -506,7 +521,7 @@ We now have well-prepared data where we can start to do some analysis. In this s
 \begin{figure}[htp]
     \centering
     \includegraphics[width=\textwidth]{Images/density.pdf}
-    \caption{\textbf{Density Plots of the Variables.} This is a density plot for 9 audio features in our extracted playlist data (slice 6000-6999 in MPD). For danceability, energy, they are close to a normal density but with slight skewness. Some of them have very long tails and very concentrated distributions over very narrow regions, i.e. loudness, speechiness, liveness. An extreme example of such "concentration" would be instrumentalness since all the mass is on a tiny neighbourhood at 0. For tempo, it seems to have 2 peaks, one is around 99 and the other is about 126.}
+    \caption{\textbf{A density plot for 9 audio features in our extracted playlist data (from slice 6000-6999 in MPD).} For danceability, energy, they are close to a normal density but with slight skewness. Some of them have very long tails and very concentrated distributions over very narrow regions, i.e. loudness, speechiness, liveness. An extreme example of such "concentration" would be instrumentalness since all the mass is on a tiny neighbourhood at 0. For tempo, it seems to have 2 peaks, one is around 99 and the other is about 126.}
     \label{fig:Density}
 \end{figure}
 
@@ -517,21 +532,21 @@ After seeing how each of the audio features is distributed, I wanted to see whet
 \begin{figure}[htp]
     \centering
     \includegraphics[width=\textwidth]{Images/1st.pdf}
-    \caption{\textbf{Comparing the distribution of the first songs and the remaining songs in all playlists in our extracted data.} This is done by extracting the first songs in all playlists and store them in a new vector. Also, store the remaining songs in all playlists in another vector. Then generate a boxplot between these two vectors. For all 10 variables, there is no significant difference between the two distributions.}
+    \caption{\textbf{Comparing the distribution of the first songs and the remaining songs in all playlists in our extracted data (from slice 6000-6999 in MPD).} This is done by extracting the first songs in all playlists and store them in a new vector. Also, store the remaining songs in all playlists in another vector. Then generate a boxplot between these two vectors. For all 10 variables, there is no significant difference between the two distributions.}
     \label{fig:1st}
 \end{figure}
 
 \begin{figure}[htp]
     \centering
     \includegraphics[width=\textwidth]{Images/1st2.pdf}
-    \caption{\textbf{Comparing the distribution of the first two songs and the remaining songs in all playlists in our extracted data.} This is done by extracting the first 2 songs in all playlists and store them in a new vector. Also, store the remaining songs in all playlists in another vector. Then generate a boxplot between these two vectors. For all 10 variables,there is no significant difference between the two distributions. }
+    \caption{\textbf{Comparing the distribution of the first two songs and the remaining songs in all playlists in our extracted data (from slice 6000-6999 in MPD).} This is done by extracting the first 2 songs in all playlists and store them in a new vector. Also, store the remaining songs in all playlists in another vector. Then generate a boxplot between these two vectors. For all 10 variables,there is no significant difference between the two distributions. }
     \label{fig:1st2}
 \end{figure}
 
 \begin{figure}[htp]
     \centering
     \includegraphics[width=\textwidth]{Images/1st3.pdf}
-    \caption{\textbf{Comparing the distribution of the first three songs and the remaining songs in all playlists in our extracted data.} This is done by extracting the first 3 songs in all playlists and store them in a new vector. Also, store the remaining songs in all playlists in another vector. Then generate a boxplot between these two vectors. For all 10 variables,there is no significant difference between the two distributions.}
+    \caption{\textbf{Comparing the distribution of the first three songs and the remaining songs in all playlists in our extracted data (from slice 6000-6999 in MPD).} This is done by extracting the first 3 songs in all playlists and store them in a new vector. Also, store the remaining songs in all playlists in another vector. Then generate a boxplot between these two vectors. For all 10 variables,there is no significant difference between the two distributions.}
     \label{fig:1st3}
 \end{figure}
 
@@ -539,20 +554,20 @@ After seeing how each of the audio features is distributed, I wanted to see whet
 \begin{figure}[h]
     \centering
     \includegraphics[width=\textwidth]{Images/1st7.pdf}
-    \caption{\textbf{Distribution of the First 7 Songs.} Regardless of the remaining songs, we focused on the distributions of the first 7 songs. This is done by extracting the first 7 songs in all playlists and store them in 7 separate vectors. Then generate a boxplot between these 7 vectors. Clearly, when we look at all 1000 playlists together, no patterns in any of the audio features can be observed.}
+    \caption{\textbf{Distribution of the first 7 songs in our extracted playlist data (from slice 6000-6999 in MPD).} Regardless of the remaining songs, we focused on the distributions of the first 7 songs. This is done by extracting the first 7 songs in all playlists and store them in 7 separate vectors. Then generate a boxplot between these 7 vectors. Clearly, when we look at all 1000 playlists together, no patterns in any of the audio features can be observed.}
     \label{fig:1st7}
 \end{figure}
 
 
-These box plots aim to see whether the distribution of the first several songs is different from the remaining songs or each other. In fact, in this way, one can hardly find any significant difference in the distributions. A simple example can clarify. Let us consider the distribution of a single variable, tempo, of 1000 three-song-playlists. Suppose all 1000 playlists are created by one user who uses all of them during gym time and prefers an order of "fast song - slow song - fast song", then we can expect the distribution of the three songs to show a clear sign of non-randomness in terms of tempo, i.e. "fast - slow - fast". However, the assumptions made here are rarely true in reality (our data is mostly real data!), because all 1000 playlists cannot be made by only one person for only one purpose. Thus, if one playlist has an order, say, "fast song - slow song - fast song", and another has "slow song - fast song - slow song", we will end up seeing nothing in their collective distribution since their patterns get cancelled out. 
+These box plots aim to see whether the distribution of the first several songs is different from the remaining songs or each other. In fact, in this way, one can hardly find any significant difference in the distributions. A simple example can clarify. Let us consider the distribution of a single variable, tempo, of 1000 three-song-playlists. Suppose all 1000 playlists are created by one user who uses all of them during gym time and prefers an order of "fast song - slow song - fast song", then we can of course observe a pattern, i.e. "fast - slow - fast". However, the assumptions made here are too stringent to be real, because our data is largely real-world based and all 1000 playlists cannot be made by only one person for only one purpose. If one playlist has an order, say, "fast song - slow song - fast song", and another has "slow song - fast song - slow song", we will end up seeing nothing in their collective distribution since their patterns get cancelled out. 
 
-Overall, though non-randomness might exist in individual playlists, it cannot be captured in a comparison between the collective distributions of 1000 first songs, 1000 second songs, ..., etc, unless some strict, unrealistic assumptions are made. 
+Overall, though non-randomness might exist in individual playlists, it cannot be captured in a comparison between the collective distributions of 1000 first songs, 1000 second songs, ..., etc, unless some very stringent assumptions are made. 
 
 \newpage
 
 
 \section{Runs Test}
-We have not been able to find any evidence of non-randomness by comparing their distributions of the first several songs in the last section, so we now want to look at one playlist at a time. This leads us to the runs test\cite{3.5}.
+In the last section, no evidence of non-randomness has been found by comparing the distributions of the first songs, second songs, etc, so we want to look at one playlist at a time. This leads to the runs test\cite{3.5}.
 
 \subsection{Concept}
  At first, let me introduce some basic concept in the runs test.
@@ -779,7 +794,7 @@ The table below gives a result of above codes.
 \end{table}
 
 \begin{remark}
-All 7 other audio features have agreed that the amount of significant results do not exceed by 20\%, and only one feature gets "isolated" by exceeding 50\%. One may say \textbf{tempo} exhibit non-randomness but that is not convincing because our dataset is real-world based and randomly sampled, and no unrealistic assumptions have been made prior to the data collection, i.e. no assumptions that 1000 randomly sampled playlists should be patterned w.r.t. tempo, and random w.r.t. all others. One possible reason could be the choice of threshold in the extended runs test, because I was manually selecting the 2 peak values as thresholds. Different choices of the thresholds will directly affect $n_1,n_2$ and $n_3$, thus the statistic and the result. However, it is not convincing enough since we can also manually change the threshold for the ordinary runs test (from mean to median for example) and this does not create big fluctuations in the significant counts. But again, one may argue that the choice of threshold in different runs test may have different size of effect, and that effect maybe larger for the extended runs test. The question remains open and could be one possible future working direction.
+All 7 other audio features have agreed that the amount of significant results do not exceed by 20\%, and only one feature gets "isolated" by exceeding 50\%. One may say \textbf{tempo} exhibit non-randomness but that is not convincing because our dataset is real-world based and randomly sampled, and no extremely stringent assumptions have been made prior to the data collection, i.e. no assumptions that 1000 randomly sampled playlists should be patterned w.r.t. tempo and not patterned w.r.t. all others. One possible reason could be the choice of threshold in the extended runs test, because I was manually selecting the 2 peak values as thresholds. Different choices of the thresholds will directly affect $n_1,n_2$ and $n_3$, thus the test statistic and the result. However, this might not be convincing enough since we can also manually change the threshold for the ordinary runs test (from mean to median for example) and this does not create big fluctuations in the significant counts. But again, one may argue that the choice of threshold in different runs test may have different size of effect, and that effect maybe larger for the extended runs test. The question remains open and could be one possible future working direction.
 \end{remark}
 \clearpage
 
@@ -853,7 +868,7 @@ Let the significance level be $\frac{\alpha}{m}$. Suppose each independent hypot
 The second line is simply an application of the Boole's inequality. The third line follows from the fact that $p_i\sim Uniform[0,1]$ for all $i\in I$. In the fourth line, $|I|$ denotes the class size of $I$, which is exactly $m$. 
 \end{proof}
 
-The Bonferroni correction is generally deemed to be very conservative \cite{5.4}\cite{5.1}\cite{5.3}\cite{5.5}\cite{5.6}, especially when $m$ becomes large. This is because, if we take $m=1000$ for instance, we will end up with a significance level of $\frac{0.05}{1000}=0.00005$, which is extremely small. Only very few results will be significant under this setting, but the true number of significant results lies way beyond that, i.e. a high rate of false negative. As commented in \cite{5.5}, the false positives get reduced at the expense of false negatives. The severity of false positives/negatives will depend on the context. Though in the context of randomness in the playlists, it does not matter that much which of Type I or Type II Error is worse.
+The Bonferroni correction is generally deemed to be very conservative \cite{5.4}\cite{5.1}\cite{5.3}\cite{5.5}\cite{5.6}, especially when $m$ becomes large. This is because, if we take $m=1000$ for instance, we will end up with a significance level of $\frac{0.05}{1000}=0.00005$, which is extremely small. Only very few results will be significant under this setting, but the true number of significant results lies way beyond that, i.e. a high rate of false negative. As commented in \cite{5.5}, the false positives get reduced at the expense of false negatives. The severity of false positives/negatives will depend on the context. In the context of randomness in the playlists, it does not matter that much which of Type I or Type II Error is worse.
 
 \newpage
 \subsubsection{The False Discovery Rate}
@@ -1228,7 +1243,7 @@ Here are some possible working directions in the future:
 \begin{itemize}
     \item Since the playlist data we extracted are not specifically designed to feel random (which is not random), it makes sense that we have no enough evidence to reject $H_0$, except for the three-category variable Tempo, which still has nearly half rejections after applying the Benjamini-Hochberg process. Does this mean there actually exist some real patterns in Tempo as we go through half of the playlists? If yes, why it is isolated from other variables which only have a small number of rejections?
     \item The construction of the R function of runs test extension is somehow like a shortcut because I manually wrote the 2 thresholds within the function instead of allowing them to be 2 variables in the input. Also, for simplicity, I delete the part of the code which creates figures about the extended runs test. Therefore, a more complete version of such R function could be created.
-    \item As I mentioned in the last part of section 4.4, the effect of using different choices of thresholds for extended runs test should be carefully examined. As you can see in Table \ref{table 1}, when there is no extension of runs test, switching from mean to median does not create a huge difference, but when it happens for the extended runs test, will there be a huge difference? If yes, why? If no, also why? Moreover, are there any "golden standards" to choose the most appropriate thresholds for a k-category runs test? 
+    \item As I mentioned in the last part of section 4.4, the effect of using different choices of thresholds for extended runs test should be carefully examined. As you can see in Table \ref{table 1}, when there is no extension of runs test, switching from mean to median does not create a huge difference, but when it happens for the extended runs test, will there be a huge difference? If yes, why? If no, why? Moreover, are there any "golden standards" to choose the most appropriate thresholds for a k-category runs test? 
     \item We have mentioned very briefly the limitation of the runs test and possible alternatives in section 4.5. It is encouraged to try them using the dataset and see whether they make any difference from the results of the runs test.
 \end{itemize}
 
@@ -1370,7 +1385,7 @@ library(dplyr)
 library(reshape2)
 library(DescTools)
 setwd("~/Desktop/ST415/R/PlaylistData")
-song <- read_csv("new_final_data.csv")
+song <- read_csv("final_data.csv")
 attach(song)
 #lets see density plot for numerical variables.
 p1<-ggplot(song, aes(x=danceability))
