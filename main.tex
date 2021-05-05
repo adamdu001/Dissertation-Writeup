@@ -89,7 +89,7 @@ Email: a.du.3@warwick.ac.uk \\
 \hfill
 
 \section*{Abstract}
-We will study the card shuffling theory and rigorously prove why $n\log n$ top in at random shuffles are enough to shuffle perfectly. We will see some famous examples of misperception of randomness. Afterwards, we will perform data extraction and analysis on the Spotify Million Playlists. Then, we will apply runs test to the extracted data. Next, we will study how to construct the k-category extension of the runs test and how to design it in R. Furthermore, we will focus on the multiple testing problem, by introducing key concepts including FWER, FDR. Finally, we will prove the theorem of Benjamini-Hochberg procedure and see whether the Bonferroni correction and Benjamini-Hochberg procedure will make any difference on our existing results.
+We will study the card shuffling theory and rigorously prove why $n\log n$ top in at random shuffles are enough to shuffle perfectly. We will see some famous examples of misperception of randomness in various psychology studies. Afterwards, we will perform data extraction and exploratory analysis on the Spotify Million Playlists, and then apply the runs test to the extracted data. Next, we will see how to construct the k-category extension of the runs test and how to design it in R. Furthermore, we will discuss the multiple testing problem and possible remedies using FWER, FDR. Finally, we will prove the bound on FDR imposed by the Benjamini-Hochberg procedure and see whether the Bonferroni correction and the Benjamini-Hochberg procedure will make any difference on our existing results.
 
 \hfill
 
@@ -116,24 +116,24 @@ Finally, I would like to thank my parents, Bianjiang and Dongxia, and my love, E
 % -------------------------------------------------
 
 \section{Introduction}
-What is randomness? What is randomness in a music playlist? If a music playlist is not random, how can we detect it? Are there any deficiencies for our method of detecting non-randomness? These 4 questions build a rough structure of this dissertation.
+What is randomness? What is randomness in a music playlist? How to model the randomness in the playlists? If a music playlist is not random, how can we detect it? If there is any method to do this, how reliable it is? These questions together build the structure of this dissertation.
 
-We will firstly study the construction of Top-in-at-random shuffle and riffle shuffle in card shuffling theories; and also we will figure out why $n\log n$ top in at random shuffles are enough to shuffle a deck of cards. By doing so, we will be having the theoretical background to understand any similar shuffling process. Then, we will move on to psychology studies on perception of randomness and see how human's perception of randomness is biased with high alternation and overbalancing in short regions. 
+We will firstly study the construction of the top in at random shuffle and riffle shuffle in card shuffling theories; and also we will prove why $n\log n$ top in at random shuffles are enough to shuffle a deck of cards. By doing so, we will be having the theoretical background to understand any similar shuffling process. Then, we will move on to psychology studies on perception of randomness and see how human's perception of randomness is biased with high alternation and overbalancing in short regions. 
 
-Afterwards, we will see how we connect the idea of randomness to the music playlists data by introducing the Million Playlists Dataset, performing data extraction and doing exploratory data analysis. In the process of doing EDA, we will find the 997 playlists collectively do not exhibit any remarkable patterns but only noise, implying the need to use the runs test to examine the playlists individually.
+Then, we will see how we connect the idea of randomness to the music playlists data by introducing the Million Playlists Dataset, performing data extraction and exploratory data analysis. In the process of doing EDA, we will find the 997 playlists collectively do not exhibit any remarkable patterns but only noise, implying the need to use the runs test to examine the playlists individually.
 
-We will construct the runs test statistic and see how to compute $p$-value by hand through studying the distribution of runs. In the application of runs test, we will see how to use R to iteratively apply the test to hundreds of playlists.
+We will thus introduce the runs test from scratch, by stating the concepts, constructing the test statistic and studying the runs distribution. In the application of runs test, we will see how to use R to iteratively apply the test to hundreds of playlists, and how to extract what we need from the results.
 
-A particular concern should be raised to the variable Tempo, which has 2 peaks, implying the use of extended runs test. Thus we will see how the test statistic is constructed and how the function in R are set up step by step. 
+In the meantime, a particular concern should be raised to one of the variables which does not fit in the ordinary runs test, implying the need of using the extended runs test. We will see how the test statistic is constructed, how the function in R are set up step by step, and the results after application.
 
-Another concern that will be discussed is the multiple testing problem since we will be doing nearly 1000 hypothesis tests at the same time. In order to introduce some correction methods like the Bonfferoni correction and the false discovery rate, we will first introduce some basic concepts like Type I and Type II Error, which is the cornerstone of this topic. Then, family-wise error rate will be studied and discussed. Then, we will see how the Bonferroni correction is essentially a control on FWER, and the Benjamini-Hochberg procedure is a control on FDR on the other hand. The relationship between FDR and FWER will be studied and proved. After that, we will prove a very difficult lemma which leads to the proof of the Benjamini-Hochberg procedure. Finally, we will apply the correction methods to our data and compare the difference between the original rejections and current rejections, and also contrast two correction methods based on the performance, lemmas and remarks.
+In the last section, we raise concerns on the multiple testing problem since we are doing nearly 1000 hypothesis tests at the same time. We will show why the MTP is actually a problem by introducing the family wise error rate. Possible remedies including the Bonfferoni correction and the Benjamini-Hochberg procedure will be discussed. We will see how the Bonferroni correction is essentially a control on FWER, and the Benjamini-Hochberg procedure is a control on FDR. The relationship between FDR and FWER will be studied and proved. After that, we will prove the bound of the FDR created by the Benjamini-Hochberg procedure. Finally, we will apply the correction methods to our data and compare the difference between the original number of rejections and current number of rejections, and also contrast two correction methods based on their relative performance.
 \clearpage
 \section{Shuffling Theory}
 \subsection{Top in at Random Shuffle}
 
 Image there is a deck of n cards. \textit{Top in at random}\cite[Example~1 on \pno~333]{1.1} shuffle refers to the process of randomly inserting the top card of a deck into the deck. A sharp estimate for the number of times the deck needed to be shuffled until it is random is $nlog(n)$. Before going into a rigorous construction of this idea, let us look at the intuition behind it. If some cards get inserted under the original bottom card, we call these cards well-shuffled because all relative orders of these cards are equally likely. Then, the whole deck is well-shuffled as long as the bottom card comes to the top and gets inserted into the deck. 
 
-Recall that a geometric distribution is a distribution of number of trails needed to get the first success in repeated Bernoulli trails. Accordingly, the number of trails/time taken for a top card to go under the original bottom card is clearly geometric, with a probability of success $\frac{k}{n}$, where $n$ refers to the total number of cards and $k$ the current position of the original bottom card. This is simply because the top card has k places to go under the original bottom card. Also, note that the expected value for a geometric random variable is the reciprocal of the probability of success, i.e. $E(X)=\frac{1}{p}$. Therefore, total time taken to perfectly shuffle a deck of cards is approximately $$T = \frac{n}{1} + \frac{n}{2} + \cdots + \frac{n}{n-1} + \frac{n}{n} \approx nlog(n).$$
+Recall that a geometric distribution is a distribution of number of trails needed to get the first success in repeated Bernoulli trails. Accordingly, the number of trails/time taken for a top card to go under the original bottom card is clearly geometric, with a probability of success $\frac{k}{n}$, where $n$ refers to the total number of cards and $k$ the current position of the original bottom card. This is simply because the top card has $k$ places to go under the original bottom card. Also, note that the expected value for a geometric random variable is the reciprocal of the probability of success, i.e. $E(X)=\frac{1}{p}$. Therefore, total time taken to perfectly shuffle a deck of cards is approximately $$T = \frac{n}{1} + \frac{n}{2} + \cdots + \frac{n}{n-1} + \frac{n}{n} \approx nlog(n).$$
 
 In order to establish this claim rigorously, we first model a step distribution for the \textit{top in at random} shuffle. Consider a permutation group $S_n$, which contains all possible permutations of $n$ objects. Then, $\{Q(\pi):\pi \in S_n\}$ is a step distribution for different steps $\pi$. Note that no matter where the top card goes in each step, the probability for every single step stays uniform, i.e.  $$Q(1)=Q(2,1)=\cdots=Q(n-1,\cdots,1)=Q(n,\cdots,1)=\frac{1}{n}$$ where $(i,i-1,\cdots,1)$ is a cycle notation representing a permutation $\pi$ mapping the first card to the $i$th position and other cards move accordingly. This enables us to further model the multiple-step distribution using convolution\cite[\pno~334]{1.1}: $$Q^k(g)=QQ^{k-1}(g)=\sum_{h\in S_n}Q(h)Q^{k-1}(gh^{-1})$$
 This means, say $k=2$, at the first step we have a permutation $h$, and next we have $gh^{-1}$, and we sum up all possible $h$. To clarify, $gh^{-1}$ is a single permutation with the effect of $h$ being removed from $g$, such that we can achieve a combined permutation of $g$ finally after 2 steps.
@@ -159,7 +159,7 @@ For the top in at random shuffle,\\
 What this theorem really says is $nlogn$ shuffles can approximately get the deck perfectly shuffled. However, this idea is expressed in a tricky way. We bound the variation distance of more shuffles (than $nlogn$) from above by 0 and bound the variation distance of less shuffles from below by 1. This means any more shuffles than $nlogn$ will result in a variation distance close to 0, where any less shuffles than $nlogn$ will result in a variation distance nearly one. Therefore, it gives an idea that $nlogn$ shuffles are enough in an asymptotic sense.
 \end{remark}
 
-\begin{remark}
+\begin{remark}\cite{1.1}
 After above set-ups, we claim that there exists $k_0=nlog(n)$ such that $d(k_0+O(k_0))\approx0$ and $d(k_0-O(k_0))\approx1$.\footnote{For the big $O$ notation: when $x\in R$ in $f(x)$ goes to infinity, the term of $f(x)$ which grows at the fastest rate is kept. By getting rid of any constant this term has, i.e. $c$ in $cg(x)$, we call the resulting term $g(x)$. Then, $f(x)=O(g(x))$ if and only if there exists $M \in R_+$, such that  $|f(x)|\leq Mg(x)$ for large enough $x$.  } 
 \end{remark}
 
@@ -234,7 +234,7 @@ n\exp{(-\frac{m}{n})}=\exp{(\log n-\frac{m}{n})},
 and $\log n-\frac{m}{n}=-c$ since we have set $m=n\log n+cn$ at the beginning of the proof.
 \end{proof}
 
-\textbf{Proof of Theorem 1(a)}
+\textbf{Proof of Theorem 1(a)}\cite{1.1}
 \begin{proof}
 Recall $T$ is the first time the original bottom card gets to the top and being inserted in the deck, and it is a strong uniform time. The idea is to show it has the same distribution as $V$ in Lemma 2, and then apply both lemmas to get the result.
 \begin{equation}
@@ -261,7 +261,7 @@ $$P(V_{n-i}-V_{n-i-1}=j)=P(T_{i+1}-T_i=j).$$
 In (1), each of $T_{i+1}-T_i$ are independent; in (3), each of $V_{i+1}-V_i$ are also independent. Then, their respective sums, $T$ and $V$, have the same distribution. By lemma 1 and 2, $$ d(n\log n+cn)\leq  P(T>n\log n+cn)\leq e^{-c},\forall c\geq0,n\geq1$$
 \end{proof}
 
-\textbf{Proof of Theorem 1(b)}
+\textbf{Proof of Theorem 1(b)}\cite{1.1}
 \begin{proof}
 With $j$ fixed, let $A_j$ be the set of arrangement of cards such that the original bottom $j$ cards remain in their original relative order. For instance, $A_{20}$ is the set containing all events with the relative order of bottom 20 cards remains unchanged after shuffling. An important implication here is that an event will no longer belong to $A_{20}$ if in this event the $20th$ card from bottom gets to the top and then inserted into the original 19 bottom cards, because it surely breaks the original order of them. Besides, we note that $$U(A_j)=\frac{1}{j!}$$
 
@@ -388,7 +388,7 @@ Based on this, 2 riffle shuffles create 4 rising sequences at most, 3 create 8 a
     \item $T$ is a strong uniform time if the deck of cards is perfectly riffle-shuffled at $T$.
 \end{itemize}
 
-\begin{proof}
+\begin{proof}\cite{1.1}
 When the rows are distinct, the joint distribution of any permutation of the deck is invariant, i.e. probability of any permutation is constant. Thus, at time $T$, all $n!$ permutations of cards are equally likely.
 \end{proof}
 
@@ -404,7 +404,7 @@ The inequality follows directly from lemma 1. For the equality, consider droppin
 
 Clearly, $$P\{T\leq k\}=\prod_{i=1}^{n-1}(1-\frac{i}{2^k}).$$
 \end{proof}
-This upper bound can be explicitly calculated by inputting values of $n$ and $k$. For instance\cite[344]{1.1}, when $n=52$, and $k=10, 11, 12, 13, 14$, the values of the upper bound are 0.73, 0.48, 0.28, 0.15, 0.08 respectively. Furthermore, if $n$ balls are regarded as $n$ people, and $2^k$ boxes as $2^k$ birthdays, the example becomes a famous birthday problem.
+This upper bound can be explicitly calculated by inputting values of $n$ and $k$. For instance\cite[344]{1.1}, when $n=52$, and $k=10, 11, 12, 13, 14$, the values of the upper bound are 0.73, 0.48, 0.28, 0.15, 0.08 respectively. Furthermore, if $n$ balls are regarded as $n$ people, and $2^k$ boxes as $2^k$ birthdays, the example becomes a famous birthday problem.\cite{1.1}
 
 \newpage
 \subsection{Perception of Randomness}
@@ -474,7 +474,7 @@ Since the MPD is huge, I selected one slice of it to work on, i.e. slice 6000-69
 
     }
 \end{verbatim}
-That is why we need to extract the information we need for a good analysis of randomness of playlists. Note that the whole data extraction process was performed using the Jupyter Notebook and the code can be found in the Appendix section. The whole procedure can be broken into these parts: 
+That is why we need to do the data extraction: for a good analysis of randomness of playlists. Note that the whole data extraction process was performed using the Jupyter Notebook and the code can be found in the Appendix section. The whole procedure can be broken into these parts: 
 
 \begin{itemize}
     \item Download the Spotify Million Playlist Dataset.
@@ -490,7 +490,6 @@ Besides, let me explain what does different music features mean. These definitio
     \item \textbf{Danceability:} Danceability describes how suitable a track is for dancing based on a combination of musical elements including tempo, rhythm stability, beat strength, and overall regularity. A value of 0.0 is least danceable and 1.0 is most danceable.
     \item \textbf{Energy:} Energy is a measure from 0.0 to 1.0 and represents a perceptual measure of intensity and activity. Typically, energetic tracks feel fast, loud, and noisy. 
     \item \textbf{Loudness:} The overall loudness of a track in decibels (dB). Loudness values are averaged across the entire track and are useful for comparing relative loudness of tracks. Loudness is the quality of a sound that is the primary psychological correlate of physical strength (amplitude). Values typical range between -60 and 0 db.
-    \item \textbf{Mode:} Mode indicates the modality (major or minor) of a track, the type of scale from which its melodic content is derived. Major is represented by 1 and minor is 0.
     \item \textbf{Speechiness:} Speechiness detects the presence of spoken words in a track. The more exclusively speech-like the recording (e.g. talk show, audio book, poetry), the closer to 1.0 the attribute value. Values above 0.66 describe tracks that are probably made entirely of spoken words. Values between 0.33 and 0.66 describe tracks that may contain both music and speech, either in sections or layered, including such cases as rap music. Values below 0.33 most likely represent music and other non-speech-like tracks.
     \item \textbf{Acousticness:} A confidence measure from 0.0 to 1.0 of whether the track is acoustic. 1.0 represents high confidence the track is acoustic.
     \item \textbf{Instrumentalness:} Predicts whether a track contains no vocals. “Ooh” and “aah” sounds are treated as instrumental in this context. Rap or spoken word tracks are clearly “vocal”. The closer the instrumentalness value is to 1.0, the greater likelihood the track contains no vocal content. Values above 0.5 are intended to represent instrumental tracks, but confidence is higher as the value approaches 1.0.
@@ -502,7 +501,7 @@ Besides, let me explain what does different music features mean. These definitio
 
 \newpage
 \subsection{Exploratory Data Analysis}
-After the data extraction, we now have a well-prepared data where we can start to do some analysis. In this section I will give a general look of the selected slice of data. This include the density plot for each audio features, and the box plot for the distribution of first several songs. 
+We now have a well-prepared data where we can start to do some analysis. In this section I will give a general look of the selected slice of data. This include the density plot for each audio features, and the box plot for the distribution of first several songs. 
 
 \begin{figure}[htp]
     \centering
@@ -525,14 +524,14 @@ After seeing how each of audio features are distributed, I wanted to see whether
 \begin{figure}[htp]
     \centering
     \includegraphics[width=\textwidth]{Images/1st2.pdf}
-    \caption{\textbf{Comparing the distribution of the first two songs and the remaining songs in all playlists in our extracted data.} Similarly, there is no significant difference between the two distributions.}
+    \caption{\textbf{Comparing the distribution of the first two songs and the remaining songs in all playlists in our extracted data.} This is done by extracting the first 2 songs in all playlists and store them in a new vector. Also store the remaining songs in all playlists in another vector. Then generate a boxplot between these two vectors. For all 10 variables,there is no significant difference between the two distributions. }
     \label{fig:1st2}
 \end{figure}
 
 \begin{figure}[htp]
     \centering
     \includegraphics[width=\textwidth]{Images/1st3.pdf}
-    \caption{\textbf{Comparing the distribution of the first three songs and the remaining songs in all playlists in our extracted data.} Again, there is no significant difference between the two distributions.}
+    \caption{\textbf{Comparing the distribution of the first three songs and the remaining songs in all playlists in our extracted data.} This is done by extracting the first 3 songs in all playlists and store them in a new vector. Also store the remaining songs in all playlists in another vector. Then generate a boxplot between these two vectors. For all 10 variables,there is no significant difference between the two distributions.}
     \label{fig:1st3}
 \end{figure}
 
@@ -540,12 +539,12 @@ After seeing how each of audio features are distributed, I wanted to see whether
 \begin{figure}[h]
     \centering
     \includegraphics[width=\textwidth]{Images/1st7.pdf}
-    \caption{\textbf{Distribution of the First 7 Songs.} Regardless of the remaining songs, we focused on the distributions of the first 7 songs. This gives a clearer picture that when we look at all 1000 playlists together, no patterns in any of the audio features can be observed.}
+    \caption{\textbf{Distribution of the First 7 Songs.} Regardless of the remaining songs, we focused on the distributions of the first 7 songs. This is done by extracting the first 7 songs in all playlists and store them in 7 separate vectors. Then generate a boxplot between these 7 vectors. Clearly, when we look at all 1000 playlists together, no patterns in any of the audio features can be observed.}
     \label{fig:1st7}
 \end{figure}
 
 
-The aim of these box plots is to see whether the distribution of the first several songs are different from remaining songs or each other. In fact, in this way one can hardly find any significant difference in the distributions. A simple example can clarify. Let us consider a distribution of a single variable speed/tempo of 1000 three-song-playlists. Suppose all 1000 playlists are created by one user who uses them in the gym and prefer an order of "fast song - slow song - fast song", then we can expect the distribution of the three songs to show a clear sign of non-randomness. However, the assumptions made here are rarely true in reality (so in our case), because all 1000 playlists cannot be made by only one person for only one purpose (different taste and different purpose). Thus, if one playlist has an order, say, "fast song - slow song - fast song", and another has "slow song - fast song - slow song", we would see nothing in their collective distribution since the non-randomness gets cancelled out. 
+The aim of these box plots is to see whether the distribution of the first several songs are different from remaining songs or each other. In fact, in this way one can hardly find any significant difference in the distributions. A simple example can clarify. Let us consider a distribution of a single variable, tempo, of 1000 three-song-playlists. Suppose all 1000 playlists are created by one user who uses all of them during gym time and prefer an order of "fast song - slow song - fast song", then we can expect the distribution of the three songs to show a clear sign of non-randomness in terms of tempo, i.e. "fast - slow - fast". However, the assumptions made here are rarely true in reality (our data is mostly real data!), because all 1000 playlists cannot be made by only one person for only one purpose. Thus, if one playlist has an order, say, "fast song - slow song - fast song", and another has "slow song - fast song - slow song", we will end up seeing nothing in their collective distribution since their patterns get cancelled out. 
 
 Overall, though non-randomness might exist in individual playlists, it cannot be captured in a comparison between the collective distributions of 1000 first songs, 1000 second songs, ..., etc, unless some strict, unrealistic assumptions are made. 
 
@@ -553,7 +552,7 @@ Overall, though non-randomness might exist in individual playlists, it cannot be
 
 
 \section{Runs Test}
-Although we have not been able to find any evidence of non-randomness in the last section by comparing their distributions of first several songs, this leads to a more reliable direction of work: since we cannot capture the non-randomness in the collective distribution of the songs in playlists, we can instead examine them individually by looking at one playlist at a time. This lead us to the runs test\cite{3.5}.
+We have not been able to find any evidence of non-randomness by comparing their distributions of first several songs in the last section, so we now want to look at one playlist at a time. This lead us to the runs test\cite{3.5}.
 
 \subsection{Concept}
  At first let me introduce some basic concept in the runs test.
@@ -562,7 +561,7 @@ Although we have not been able to find any evidence of non-randomness in the las
     \item \textbf{General idea:} we first convert a sequence of numerical values into a binary sequence using a threshold value, then we can use runs test to see whether the original sequence of number are randomly distributed above and below the threshold value.
 \end{itemize}
 
-From this idea we can see if we convert, say, danceability of a single playlist into a binary string, we are able to use the runs test to see whether or not the songs are randomly ordered in terms of danceability.
+If we convert, say, danceability of a single playlist into a binary string, we are able to use the runs test to see whether or not the songs are randomly ordered in terms of danceability.
 
 \begin{itemize}
     \item \textbf{Null Hypothesis:} the original sequence of number are randomly distributed above and below the threshold value.
@@ -608,6 +607,7 @@ Essentially, the runs test is performing a comparison between the observed numbe
 
 In fact, (7) is pretty straight forward. If we recall the fact that the p value is actually calculating the area of the tails or probability of the tail events, we can see this equation is doing exactly the same thing. the left hand side $P(|R-\mu_R|\ge|r-\mu_R|)$ is the probability that the number of runs $R$ is more far away from the mean than the current realisation $r$, while the right hand side calculated the area of the 2 tails. Note the lower bound of the left tail and the upper bound of the right tail are the minimum and maximum of $R$ respectively. The minimum $R$ for a binary string is 2, if we ignore the case $n_i=0$. The maximum $R$ is $2min(n_1,n_2)+1$, if $N$ is odd; an even $N$ does not need to add an extra run. 
 
+\textbf{Explanation of (5) and (6)}
 \begin{itemize}
     \item (5) is the case when $R$ is even, (6) when $R$ is odd, $m$ taking values of 1, 2, 3, ... .
     \item The denominators in (5) and (6) are both $\binom{N}{n_1}$, i.e. the number of ways of placing $n_1$ in $N$ positions, and it can be regarded as the total number of permutations. 
@@ -630,15 +630,13 @@ We need to be very cautious when we apply the runs test to our data, since
 
 The implication of the first bullet point not only involves a careful design of function in R, but also the fact that we will be performing thousands of runs test, which clearly associate with the multiple testing problem. I will discuss the multiple testing problem in chapter 5. In the remaining of this chapter, I will focus on the design of the desired function and also address the issue raised in the second bullet point. Some of the code will be included here for clarification purpose, but the complete version of the code can be found in the appendix.
 
-What has already been done in the EDA section is locating the starting position (row number) of each playlist. I have arranged the positions in a vector called $ind1$, and used it to generate the plots in the EDA section. As you can see below, I used the function $lag$ to find the starting point of a new playlist, and then $ind1$ is defined to be positions of all first songs in the dataset.
+What has already been done in the EDA section is finding the starting position (row number) of each playlist. I have arranged the positions in a vector called $ind1$, and used it to generate the plots in the EDA section. As you can see below, I used the function $lag$ to find the starting point of a new playlist, and then $ind1$ is defined to be positions of all first songs in the dataset.
 \begin{verbatim}
     ind1 <- which(song$playlist_name != lag(song$playlist_name))
     ind1 <- c(1,ind1)
 \end{verbatim}
 Now we consider how to find the position of the last songs in each playlists. It turns out to be $ind1[i]-1$. However, if we run this for all $i=1, \cdots, 997$, we would miss the last playlist in the dataset. Thus, we create a vector $IND$ to overcome it. Now the final playlist is captured when $i=998$. 
 \begin{verbatim}
-    ind1[1]:(ind1[2]-1)
-    ind1[2]:(ind1[3]-1)
     IND<-c(ind1,nrow(song)+1)
     IND[997]:(IND[998]-1)
 \end{verbatim}
@@ -649,21 +647,11 @@ Then, after installing and load the package $randtests$ \cite{3.7}, we can write
      for (i in 1:997) {
        p[i]<-runs.test(a[IND[i]:(IND[i+1]-1)],
        threshold = mean(a[IND[i]:(IND[i+1]-1)]))$p.value
-     }
+     } #can use median as well
      return(p)
     }
 \end{verbatim}
 
-\begin{verbatim}
-    RT<-function(a){
-     p<-rep(0,997)
-     for (i in 1:997) {
-       p[i]<-runs.test(a[IND[i]:(IND[i+1]-1)],
-       threshold = median(a[IND[i]:(IND[i+1]-1)]))$p.value
-     }
-      return(p)
-    }
-\end{verbatim}
 Now this function $RT$ allows me to perform runs test on each of the music feature/columns, in return giving me a vector of $p$-value for each column of the dataset. We name each of the vector in terms of their corresponding music features, and count how many $p$-value are significant, for $\alpha=0.05$.
 \begin{verbatim}
     P.dance<-RT(song$danceability)
@@ -682,8 +670,10 @@ Now this function $RT$ allows me to perform runs test on each of the music featu
     nrow(as.data.frame(which(P.valence<0.05)))
 \end{verbatim}
 
-The count for the number of significant results after applying $RT$ (with threshold mean and median respectively) to each column of our dataset is given in the table below.
-\begin{longtable}{|c|c|c|}
+The count for the number of significant results after applying $RT$ (with threshold mean and median respectively) to each column of our dataset is given in the table \ref{table 1}.
+
+\begin{table}[h!]
+\begin{tabular}{|c|c|c|}
     \hline
      Audio Features & No. of Significant Results (mean) & No. of Significant result (median) \\
     \hline
@@ -701,15 +691,15 @@ The count for the number of significant results after applying $RT$ (with thresh
      \hline
      Valence &110&118\\
     \hline
-  \caption{\textbf{Number of significant observations for each audio features in the dataset after applying the runs test, with threshold being the mean and the median respectively.} The result shows, when we choose the mean to be the threshold for the runs test, the highest number of significant observations is in loudness, where 190 out of 997 playlists reported non-randomness; on the other hand, the lowest is in liveliness, where only 76 out of 997 reported non-randomness.If we set the threshold to be median, we would observe a generally similar outcome, with the highest count being 173 (loudness) and the lowest being 52 (liveliness). Notice neither of the 2 threshold had made the significant observations above $20\%$.}
+\end{tabular}
+  \caption{\textbf{Number of significant observations for some audio features in the dataset after applying the runs test, with threshold being the mean and the median respectively.} The result shows, when we choose the mean to be the threshold for the runs test, the highest number of significant observations is in loudness, where 190 out of 997 playlists reported non-randomness; on the other hand, the lowest is in liveliness, where only 76 out of 997 reported non-randomness.If we set the threshold to be median, we would observe a generally similar outcome, with the highest count being 173 (loudness) and the lowest being 52 (liveliness). Notice neither of the 2 threshold had made the significant observations above $20\%$.}
   \label{table 1}
-\end{longtable}
-
-Note that we left the variable \textbf{tempo} in the dataset because it has more than one category (due to the fact that it has 2 peaks in its density plot) thus it cannot be input in $RT$, our ordinary runs test function. We will deal with it in the next section.
+\end{table}
+Note that we left the variable \textbf{tempo} in the dataset because it has more than one category (due to the fact that it has 2 peaks in its density plot) thus it cannot be an input in $RT$, our ordinary runs test function. We will deal with it in the next section.
 
 
 \newpage
-\subsection{K-category extension of the runs test}
+\subsection{K-category Extension of The Runs Test}
 Let us address the issue for the column \textbf{tempo}, which has 2 peaks observed from the density plot. It seems inappropriate to convert it into a binary factor; instead, we could divide it into a three category variable using some thresholds. This introduces the k-category extension of the runs test\cite{3.4}\cite{3.3}.
 
 \begin{itemize}
@@ -758,7 +748,7 @@ Next we form the 3-category vector using the threshold. Note that my aim is to c
 \end{verbatim}  
 As mentioned above, I have already fixed the test to be two-sided at the very beginning of the function for simplicity, so the $p$-value will simply be $2 * min(pv0, 1 - pv0)$, i.e. the area of the tails, and the alternative hypothesis will be "non-randomness". The output of this function will be a list.
 
-Now, the function $RTkext$ gives a list of results, but what I really need is still the $p$-values. Thus, I put the function $RTkext$ into a recursive function $RT.KEXT$, and perform the runs test with 3 categories for each playlist. The output of $RT.KEXT$ returns the $p$-value from the runs test. Then, we apply this function to the column \textbf{tempo} and count the significant observations with $\alpha=0.05$. 
+Now, the function $RTkext$ gives a list of results, but what I really need is still the $p$-values. Thus, I put the function $RTkext$ into a new recursive function $RT.KEXT$, and perform the runs test with 3 categories for each playlist. The output of $RT.KEXT$ returns the $p$-value from the runs test. Then, we apply this function to the column \textbf{tempo} and count the significant observations with $\alpha=0.05$. 
 
 \begin{verbatim}
   RT.KEXT<-function(a){
@@ -789,30 +779,45 @@ The table below gives a result of above codes.
 \end{table}
 
 \begin{remark}
-All 7 other audio features have agreed that the amount of significant results do not exceed by 20\%, and only one feature gets "isolated" by exceeding 50\%. One may say \textbf{tempo} exhibit non-randomness but that is not convincing because our dataset is real-world based and randomly sampled, and no unrealistic assumptions have been made prior to the data collection, i.e. no assumptions that 1000 randomly sampled playlists should be patterned w.r.t. tempo and random w.r.t. all others. One possible reason could be the choice of threshold in the extended runs test, because I was manually selecting the 2 peak values as thresholds. Different choices of the thresholds will directly affect $n_1,n_2$ and $n_3$, thus the statistic and the result. However, it is not convincing enough since we can also manually change the threshold for the ordinary runs test (from mean to median for example) and this does not create big fluctuations in the significant counts. But again, one may argue that the choice of threshold in different runs test may have different size of effect, and that effect maybe larger for the extended runs test. The question remains open and could be one possible future working direction.
+All 7 other audio features have agreed that the amount of significant results do not exceed by 20\%, and only one feature gets "isolated" by exceeding 50\%. One may say \textbf{tempo} exhibit non-randomness but that is not convincing because our dataset is real-world based and randomly sampled, and no unrealistic assumptions have been made prior to the data collection, i.e. no assumptions that 1000 randomly sampled playlists should be patterned w.r.t. tempo, and random w.r.t. all others. One possible reason could be the choice of threshold in the extended runs test, because I was manually selecting the 2 peak values as thresholds. Different choices of the thresholds will directly affect $n_1,n_2$ and $n_3$, thus the statistic and the result. However, it is not convincing enough since we can also manually change the threshold for the ordinary runs test (from mean to median for example) and this does not create big fluctuations in the significant counts. But again, one may argue that the choice of threshold in different runs test may have different size of effect, and that effect maybe larger for the extended runs test. The question remains open and could be one possible future working direction.
 \end{remark}
-
-
-Though the K-category extension of the runs test is used here, a more powerful version\cite{3.4} of the runs test that can be employed when there are more than two categories has been developed. 
-
+\clearpage
 
 
 
+\subsection{Alternative Methods for Assessing Randomness}
+The single sample runs test used in this section is only one of many methods to test randomness. However, it is not considered to be an effective method for assessing randomness by many sources \cite{3.4}. By \cite{3.8}, the runs test has a "very low statistical power".
 
-\newpage
+A range of alternative tests for randomness allows for multiple categories. However, since there is no unified standard to assess randomness, the stringency between tests varies and a series might meet the standard for one but fail for another. \cite{3.4}
+
+Alternative ways of test of randomness includes but not limited to: 
+\begin{itemize}
+    \item \textbf{The frequency test}\cite{3.4}: assesses the frequency of each category. Then, we can use the chi-square goodness-of-fit test, the binomial sign test for a single sample, or the Kolmogorov–Smirnov goodness-of-fit test for a single sample, depending on the purpose.\cite{3.4}
+    \item \textbf{The gap test}\cite{3.10}\cite{3.11}\cite{3.12}\cite{3.13}\cite{3.14}\cite{3.15}\cite{3.16}: evaluates the number of gaps appearance of an outcome and the reappearance of it. We can use the single-sample z test, the single-sample chi-square test for a population variance, or the chi-square goodness-of-fit test, depending on the purpose.\cite{3.4}
+    \item \textbf{The poker test}\cite{3.10}\cite{3.11}\cite{3.12}\cite{3.13}\cite{3.14}\cite{3.15}\cite{3.16}: divide a series into groups of 5, and each group corresponds to a poker hand. Flushes and straights are not considered here. Then, we compare the frequency of occurrence of observed number of hands for "Five of a kind", "Four of a kind", "Full house", "Two pair", "One pair" and "High card" with their expected frequencies. Finally, perform the chi-square goodness-of-fit test to evaluate the result.\cite{3.4}
+    \item \textbf{The maximum test}\cite{3.11}: evaluates strings of three consecutive digits in a series. We record the number of cases where the middle digit is the highest in the 3-digit string. We can use the binomial sign test for a single sample.\cite{3.4}
+    \item \textbf{The mean square successive difference test}\cite{3.17}\cite{3.18}\cite{3.19}\cite{3.20}\cite{3.9}: compares the mean of the squares of the differences of n – 1 successive differences in a series of n numbers with the variance of the n numbers. The mean square successive difference test can be used here.\cite{3.4}
+    \item \textbf{Autocorrelation}\cite{3.4}: randomness is implied by a 0 correlation coefficients between consecutive numbers in a series. The process of autocorrelation includes the Durbin Watson test. \cite{3.20}\cite{3.21}\cite{3.22}\cite{3.23}\cite{3.24}\cite{3.25}
+    \item \textbf{The coupon collector's test} \cite{3.4}: evaluates the number of digits required for forming a complete set, i.e. all digits have been "collected". We can use the single-sample z test or the chi-square goodness-of-fit test, for different purpose.\cite{3.4}
+    \item \textbf{The serial test} \cite{3.4}: evaluates the number of occurrence of every two-digit combination, $ij$, $i\in \{1,\cdots,n\},j\in \{1,\cdots,n\}$. It can be generalised to multiple digits. \cite{3.26}
+    \item \textbf{The $\mathbf{d^2}$ test of random numbers}\cite{3.11}: treat random numbers as points on a graph. If two points are chosen randomly within a unit square grid, what is the probability that the distance in between is greater than certain value? Usually it is used to test randomness for values in [0,1]. \cite{3.4}
+\end{itemize}
+
+\clearpage
+
 
 
 \section{Multiple Testing Problem}
-In the last section, we have seen how to apply the runs test and its extension to our data; however, we should not forget that the dataset used has 997 playlists, and we essentially tested 997 hypotheses for each of the randomness of an audio feature. This gave rise to the multiple testing problem, where the $p$-values no longer accurately indicates the statistical significance\cite{5.2}. In this section, I will discuss the theoretical background of multiple testing problem and some of possible correction methods; then, I will apply them to our dataset to see if there will be any changes.
+In the previous section, we have seen how to apply the runs test and its extension to our data; however, we should not forget that the dataset used has 997 playlists, and we essentially tested 997 hypotheses for each of the audio features. This give rise to the multiple testing problem (MTP), where the $p$-values no longer accurately indicates the statistical significance\cite{5.2}. In this section, I will discuss the why multiple testing problem is a problem with some of possible correction methods; then, I will apply them to our dataset to see if there will be any changes.
 
 
-\subsection{Theoretical Background}
+\subsection{Why is the MTP Problematic?}
 A hypothesis test involves a null hypothesis and an alternative hypothesis, and in a hypotheses test a person could make either a Type I error or a Type II error. These are defined as following\cite{5.2}:
 \begin{itemize}
     \item \textbf{Type I Error:} number of rejections of true null hypothesis.
     \item \textbf{Type II Error:} number of acceptances of false null hypothesis.
 \end{itemize}
-So a Type I error is when an observation is not significant, you categorise it as significant observation. A Type II error is you categorise a significant observation as an insignificant one. It is generally agreed that making a Type I error has more serious consequences.\cite{5.2} The probability of making a Type I error (significance level) is usually set to be 0.05, which means you want to be 95\% confident that your results are significant, and there is a 5\% chance that it is only by chance.\cite{5.4}
+A Type I error is made when you categorise a true null as a false one. A Type II error is made when you categorise a false null as a true one. It is generally agreed that making a Type I error has more serious consequences.\cite{5.2} The probability of making a Type I error (significance level) is usually set to be 0.05, which means you want to be 95\% confident that your results are significant, and there is a 5\% chance that it is only by chance.\cite{5.4}
 
 The family-wise error rate (FWER) provides an overall measure of error.\cite{5.1} Consider what we are doing in the last chapter: for one audio feature, we tested 997 hypotheses with a significance level $\alpha=0.05$; then, we can compute the overall measure of error FWER\cite{5.4} as follows:
 \begin{align*}
@@ -830,7 +835,7 @@ Note the computation is based on the assumption that all 997 tests are independe
 
 \newpage
 \subsection{Correction Methods}
-There are two ways to control Type I Error, one is to control the FWER and another to control the false discovery rate. In the following of this subsection I will go through a range of methods from these two aspects.
+There are two ways to control Type I Error, one is to control the FWER and another to control the false discovery rate. In the following of this subsection I will these two methods in detail.
 
 \subsubsection{Bonferroni Correction}
 The Bonferroni correction was designed to control the FWER, which is to control the overall probability of at least 1 Type I Error. It is to divide the significance level $\alpha$ by $m$, the total number of test, which is 997 in our case. By doing such division, FWER will be bounded above by $\alpha$, i.e. 
@@ -848,7 +853,7 @@ Let the significance level be $\frac{\alpha}{m}$. Suppose each independent hypot
 The second line is simply an application of the Boole's inequality. The third line follows from the fact that $p_i\sim Uniform[0,1]$ for all $i\in I$. In the fourth line, $|I|$ denotes the class size of $I$, which is exactly $m$. 
 \end{proof}
 
-The Bonferroni correction is generally deemed to be very conservative \cite{5.4}\cite{5.1}\cite{5.3}\cite{5.5}\cite{5.6}, especially when $m$ becomes large. This is because, if we take $m=1000$ for instance, we will end up with a significance level of $\frac{0.05}{1000}=0.00005$, which is extremely small. Only few results will be significant under this setting, but the true number of significant results lies way beyond that, i.e. a high rate of false negative. As commented in \cite{5.5}, the false positives gets reduced at the expense of false negatives. Severity of false positives/negatives will depends on the context. Though in the context of randomness in the playlists it does not matter which of the Type I or Type II Error is worse, in the context of, say, border control during COVID-19 a false negative does have more serious consequences.
+The Bonferroni correction is generally deemed to be very conservative \cite{5.4}\cite{5.1}\cite{5.3}\cite{5.5}\cite{5.6}, especially when $m$ becomes large. This is because, if we take $m=1000$ for instance, we will end up with a significance level of $\frac{0.05}{1000}=0.00005$, which is extremely small. Only few results will be significant under this setting, but the true number of significant results lies way beyond that, i.e. a high rate of false negative. As commented in \cite{5.5}, the false positives gets reduced at the expense of false negatives. Severity of false positives/negatives will depends on the context. Though in the context of randomness in the playlists, it does not matter that much which of the Type I or Type II Error is worse.
 
 \newpage
 \subsubsection{The False Discovery Rate}
@@ -911,7 +916,7 @@ Then,
 \end{proof}
 
 \begin{remark}
-Lemma 6 shows how controlling FDR implies a control of FWER. As noted in Benjamini(1995) \cite{5.7}, this is a control in the weak sense, since it is based on the assumption that all null hypotheses are true.
+Lemma 6 shows how controlling FDR implies a control of FWER. As noted in Benjamini (1995) \cite{5.7}, this is a control in the weak sense, since it is based on the assumption that all null hypotheses are true.
 \end{remark}
 
 \begin{lemma}
@@ -959,10 +964,10 @@ The Benjamini-Hochberg procedure is defined as follows \cite{5.7}:
 
 \begin{theorem}
 The Benjamini-Hochberg procedure controls the FDR at $q^*$
-for independent hypothesis tests and for any configurations of false null hypotheses (for any $V,S$ in $R$). \cite{5.7}
+for independent hypothesis tests and for any configurations of false null hypotheses (for any $t,s$). \cite{5.7}
 \end{theorem}
 
-Lemma 8 is needed to prove Theorem 4. Now let me list all notations \cite{5.3} we need for the following lemmas and proofs.
+Lemma 8 is needed to prove Theorem 4. Now let me list all notations \cite{5.3} we need for the following lemma and proof.
 \begin{itemize}
     \item Null hypothesis: $H_1,\cdots,H_m$
     \item Ordered null hypothesis: $H_{(1)},\cdots,H_{(k)}$
@@ -1000,7 +1005,7 @@ Define \[
 j_0:=\max_{0\leq j\leq m_1}\left\{j:z_j\leq
 \frac{m_0+j}{k+1}q^*\right\}
 \]
-\textbf{Important Note 1: we want this $\mathbf{j_0}$ to play the role of k in Definition 4, i.e. the $\mathbf{j_0}$-th p-value is a threshold for stopping rejection, but we keep rejecting until $\mathbf{j_0}$.}
+\textbf{Important Note 1: we want this $\mathbf{j_0}$ to play the role of k in Definition 4, i.e. the $\mathbf{j_0}$-th p-value is a threshold for stopping rejection, where we keep rejecting from the beginning until we reach $\mathbf{j_0}$.}
 
 Then let\[
 z_{j_0}\leq z':=\frac{m_0+j_0}{k+1}q^*
@@ -1112,7 +1117,7 @@ Now the statement in Lemma 8 is true for $m=k+1$. By induction, Lemma 8 is true 
 \textbf{Proof of Theorem 4}
 \begin{proof} \cite{5.3}\cite{5.7}
 From lemma 8, whatever the joint distribution of $Z_1,\cdots,Z_{m_1}$ is,  if we integrate the inequality, we get
-\[E[Q]\leq\frac{m_0}{m}q^*\leq q*
+\[E[Q]\leq\frac{m_0}{m}q^*\leq q^*
 \]
 Thus the FDR is bounded by $q^*$.
 \end{proof}
@@ -1211,19 +1216,20 @@ The results of these two correction methods are summarised in Table \ref{table 4
 
 
 \section{Conclusion}
-We have constructed the model for Top-in-at-random shuffle and riffle shuffle based on Diaconis(1986), where we studied why $nlogn$ top in at random shuffles are enough to shuffle a deck of cards.These have given us an intuition and mathematical background to understand any similar shuffling process. Then, we moved on to psychology studies on perception of randomness, where we saw strong evidence that human's perception of randomness is biased with high alternation and overbalancing in short regions. Afterwards, we saw how we connect the idea of randomness to the music playlists data by introducing the Million Playlists Dataset, performing data extraction and doing exploratory data analysis. 
+We have constructed the model for the top-in-at-random shuffle and riffle shuffle based on Diaconis(1986), and we studied why $nlogn$ top in at random shuffles are enough to shuffle a deck of cards. These have given us an intuition and mathematical background to understand any similar shuffling process. Then, we moved on to psychology studies on perception of randomness, where we saw strong evidence that human's perception of randomness is biased with high alternation and overbalancing in short regions. Afterwards, we saw how we connect the idea of randomness to the music playlists data by introducing the Million Playlists Dataset, performing data extraction and doing exploratory data analysis. 
 
 However, in the process of doing EDA, we found the 997 playlists collectively did not exhibit any remarkable pattern but only noise, so we instead examined the 997 playlists one by one by using the runs test. We introduced the test statistic of runs test when $n$ is big, and we studied the distribution of runs in detail, which enabled us to compute $p$-values by hand. In the application of runs test, we saw how to use R to iteratively apply the test to hundreds of playlists, and then we summarised the result of the number of rejections in several tables. 
 
-A particular concern has been raised to the variable Tempo, which has 2 peaks, implying the use of extended runs test. Thus we saw how the test statistic was constructed and how the function in R were set up step by step. Then we applied these to our data giving us the results for the variable Tempo.
+A particular concern has been raised on the variable Tempo, which has 2 peaks, implying the need of the extended runs test. Therefore, we constructed the test statistic and set up the function in R step by step. Then, we applied these to our data giving us the results for the variable Tempo.
 
-Another concern was about the multiple testing problem since we were doing nearly 1000 hypothesis tests at the same time. In order to introduce some correction methods like the Bonfferoni correction and the false discovery rate, we first introduced some basic concepts like Type I and Type II Error, which is the cornerstone of this topic. Then, family-wise error rate was studied and discussed. Then, we see how the Bonferroni correction is essentially a control on FWER, and the Benjamini-Hochberg procedure is a control on FDR on the other hand. The relationship between FDR and FWER was studied and proved. After that, we proved a very difficult lemma which leads to the proof of the Benjamini-Hochberg procedure. Finally, we applied the correction methods to our data and compared the difference between the original rejections and current rejections, and also contrasted two correction methods based on the performance, lemmas and remarks.
+Another concern was on the multiple testing problem since we were doing nearly 1000 hypothesis tests at the same time. In order to introduce some correction methods like the Bonfferoni correction and the false discovery rate, we first introduced some basic concepts like Type I and Type II Error, which are the cornerstones of this topic. Then, the family-wise error rate was studied and discussed. We saw how the Bonferroni correction is essentially a control on FWER, and the Benjamini-Hochberg procedure is a control on FDR. The relationship between FDR and FWER was studied and proved. After that, we proved lemma which leads to the proof of the bound of the FDR created by the Benjamini-Hochberg procedure. Finally, we applied the correction methods to our data and compared the difference between the original number of rejections and current number of rejections, and also contrasted two correction methods based on their relative performance.
 
 Here are some possible working directions in the future:
 \begin{itemize}
     \item Since the playlist data we extracted are not specifically designed to feel random (which is not random), it makes sense that we have no enough evidence to reject $H_0$, except for the three-category variable Tempo, which still have nearly half rejections after applying the Benjamini-Hochberg process. Does this mean there actually exist some real patterns in Tempo as we go through half of the playlists? If yes, why it is isolated from other variables which only have a small number of rejections?
-    \item The construction of the R function of runs test extension is somehow like using a shortcut because I manually wrote the 2 thresholds within the function instead of allowing it to be a variable in the input. Also, for simplicity I delete the part of code which creates figures about the extended runs test. Therefore, a more complete version of such R function could be created.
+    \item The construction of the R function of runs test extension is somehow like a shortcut because I manually wrote the 2 thresholds within the function instead of allowing them to be 2 variables in the input. Also, for simplicity I delete the part of code which creates figures about the extended runs test. Therefore, a more complete version of such R function could be created.
     \item As I mentioned in the last part of section 4.4, the effect of using different choice of threshold for extended runs test should be carefully examined. As you can see in Table \ref{table 1}, when there is no extension of runs test, switching from mean to median does not create a huge difference, but when it happens for the extended runs test, will there be huge difference? If yes, why? If no, also why? Moreover, are there any "golden standards" to choose the most appropriate thresholds for a k-category runs test? 
+    \item We have mentioned very briefly the limitation of the runs test and possible alternatives in section 4.5. It is encouraged to try them using the dataset and see whether they make any difference from the results of the runs test.
 \end{itemize}
 
 
@@ -1264,7 +1270,7 @@ Here are some possible working directions in the future:
 
 
 \begin{appendices}
-\section{Code for Data Extraction}
+\section{Python Code for Data Extraction}
 \begin{verbatim}
 import json
 import csv
@@ -1353,7 +1359,7 @@ def json_extract(obj, key):
 # #Extracting all playlist lengths and converting to an array
 # lengths = json_extract(playlists, 'num_tracks')
 \end{verbatim}
-\section{Code for EDA, Runs Tests and Correction Methods for Multiplicity}
+\section{R Code for EDA, Runs Tests and Correction Methods for Multiplicity}
 \begin{verbatim}
 library(randtests)
 library(readr)
